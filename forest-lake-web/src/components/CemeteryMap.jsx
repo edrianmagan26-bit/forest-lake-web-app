@@ -1,17 +1,17 @@
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, AdvancedMarker, Polygon } from '@vis.gl/react-google-maps';
 import { useState, useEffect } from 'react';
 import StatusBadge from './StatusBadge';
 import api from '../utils/api';
 
 const API_KEY = 'AIzaSyAZlAn5fIIkQobmGUpV0207KVn--oIhhZg';
-const CENTER = { lat: 10.602576, lng: 122.935151 };
+const CENTER = { lat: 10.6025, lng: 122.9351 };
 const MAP_ID = 'forest_lake_map';
 
 const RESTRICTION = {
-  north: 10.6058,
-  south: 10.5998,
-  east: 122.9380,
-  west: 122.9305,
+  north: 10.6055,
+  south: 10.5995,
+  east: 122.9400,
+  west: 122.9300,
 };
 
 const pinColors = {
@@ -19,6 +19,246 @@ const pinColors = {
   reserved: '#f59e0b',
   occupied: '#ef4444',
 };
+
+// Block and Section boundaries traced from actual road coordinates
+// Grid intersection points (5 rows × 3 columns):
+// Row 0: (10.602855,122.933668) (10.603024,122.933954) (10.603202,122.934230)
+// Row 1: (10.602651,122.933834) (10.602848,122.934086) (10.603053,122.934348)
+// Row 2: (10.602389,122.934037) (10.602589,122.934297) (10.602791,122.934561)
+// Row 3: (10.602129,122.934249) (10.602334,122.934504) (10.602535,122.934765)
+// Row 4: (10.601831,122.934577) (10.602054,122.934740) (10.602324,122.934940)
+
+const BLOCK_BOUNDARIES = [
+  { name: 'Aster Estate A',
+    paths: [
+      { lat: 10.602855, lng: 122.933668 },
+      { lat: 10.603024, lng: 122.933954 },
+      { lat: 10.603202, lng: 122.934230 },
+      { lat: 10.603053, lng: 122.934348 },
+      { lat: 10.602791, lng: 122.934561 },
+      { lat: 10.602535, lng: 122.934765 },
+      { lat: 10.602324, lng: 122.934940 },
+      { lat: 10.602054, lng: 122.934740 },
+      { lat: 10.601831, lng: 122.934577 },
+      { lat: 10.601920, lng: 122.934416 },
+      { lat: 10.602129, lng: 122.934249 },
+      { lat: 10.602389, lng: 122.934037 },
+      { lat: 10.602651, lng: 122.933834 },
+    ],
+  },
+  { name: 'Aster Estate B',
+    paths: [
+      { lat: 10.603251, lng: 122.934306 },
+      { lat: 10.603534, lng: 122.934750 },
+      { lat: 10.603806, lng: 122.935208 },
+      { lat: 10.603479, lng: 122.935378 },
+      { lat: 10.603145, lng: 122.935542 },
+      { lat: 10.603138, lng: 122.935544 },
+      { lat: 10.602749, lng: 122.935259 },
+      { lat: 10.602397, lng: 122.934993 },
+      { lat: 10.602665, lng: 122.934780 },
+      { lat: 10.602954, lng: 122.934542 },
+    ],
+  },
+  { name: 'Aster Estate C',
+    paths: [
+      { lat: 10.603091, lng: 122.935621 },
+      { lat: 10.602897, lng: 122.935943 },
+      { lat: 10.602697, lng: 122.936258 },
+      { lat: 10.602687, lng: 122.936267 },
+      { lat: 10.602092, lng: 122.936206 },
+      { lat: 10.601830, lng: 122.936176 },
+      { lat: 10.602015, lng: 122.935757 },
+      { lat: 10.602170, lng: 122.935403 },
+      { lat: 10.602336, lng: 122.935053 },
+      { lat: 10.602707, lng: 122.935327 },
+    ],
+  },
+  { name: 'Aster Estate D',
+    paths: [
+      { lat: 10.601958, lng: 122.935683 },
+      { lat: 10.601808, lng: 122.935660 },
+      { lat: 10.601612, lng: 122.936097 },
+      { lat: 10.601746, lng: 122.936152 },
+    ],
+  },
+  { name: 'Aster Estate E',
+    paths: [
+      { lat: 10.601736, lng: 122.935642 },
+      { lat: 10.601197, lng: 122.935556 },
+      { lat: 10.601182, lng: 122.935922 },
+      { lat: 10.601552, lng: 122.936074 },
+    ],
+  },
+];
+
+const SECTION_BOUNDARIES = [
+  // Section A (top-left)
+  { name: 'A', paths: [
+    { lat: 10.602855, lng: 122.933668 },
+    { lat: 10.603024, lng: 122.933954 },
+    { lat: 10.602848, lng: 122.934086 },
+    { lat: 10.602651, lng: 122.933834 },
+  ]},
+  // Section B (top-right)
+  { name: 'B', paths: [
+    { lat: 10.603024, lng: 122.933954 },
+    { lat: 10.603202, lng: 122.934230 },
+    { lat: 10.603053, lng: 122.934348 },
+    { lat: 10.602848, lng: 122.934086 },
+  ]},
+  // Section D (row2-left)
+  { name: 'D', paths: [
+    { lat: 10.602651, lng: 122.933834 },
+    { lat: 10.602848, lng: 122.934086 },
+    { lat: 10.602589, lng: 122.934297 },
+    { lat: 10.602389, lng: 122.934037 },
+  ]},
+  // Section C (row2-right)
+  { name: 'C', paths: [
+    { lat: 10.602848, lng: 122.934086 },
+    { lat: 10.603053, lng: 122.934348 },
+    { lat: 10.602791, lng: 122.934561 },
+    { lat: 10.602589, lng: 122.934297 },
+  ]},
+  // Section E (row3-left)
+  { name: 'E', paths: [
+    { lat: 10.602389, lng: 122.934037 },
+    { lat: 10.602589, lng: 122.934297 },
+    { lat: 10.602334, lng: 122.934504 },
+    { lat: 10.602129, lng: 122.934249 },
+  ]},
+  // Section F (row3-right)
+  { name: 'F', paths: [
+    { lat: 10.602589, lng: 122.934297 },
+    { lat: 10.602791, lng: 122.934561 },
+    { lat: 10.602535, lng: 122.934765 },
+    { lat: 10.602334, lng: 122.934504 },
+  ]},
+  // Section H (bottom-left)
+  { name: 'H', paths: [
+    { lat: 10.602129, lng: 122.934249 },
+    { lat: 10.602334, lng: 122.934504 },
+    { lat: 10.602054, lng: 122.934740 },
+    { lat: 10.601831, lng: 122.934577 },
+    { lat: 10.601920, lng: 122.934416 },
+  ]},
+  // Section G (bottom-right)
+  { name: 'G', paths: [
+    { lat: 10.602334, lng: 122.934504 },
+    { lat: 10.602535, lng: 122.934765 },
+    { lat: 10.602324, lng: 122.934940 },
+    { lat: 10.602054, lng: 122.934740 },
+  ]},
+  // === Aster Estate B (Right area) - 2 columns × 3 rows ===
+  // Section I (top-left)
+  { name: 'I', paths: [
+    { lat: 10.603251, lng: 122.934306 },
+    { lat: 10.603534, lng: 122.934750 },
+    { lat: 10.603212, lng: 122.934951 },
+    { lat: 10.602954, lng: 122.934542 },
+  ]},
+  // Section J (top-right)
+  { name: 'J', paths: [
+    { lat: 10.603534, lng: 122.934750 },
+    { lat: 10.603806, lng: 122.935208 },
+    { lat: 10.603479, lng: 122.935378 },
+    { lat: 10.603212, lng: 122.934951 },
+  ]},
+  // Section K (middle-left)
+  { name: 'K', paths: [
+    { lat: 10.602954, lng: 122.934542 },
+    { lat: 10.603212, lng: 122.934951 },
+    { lat: 10.602907, lng: 122.935155 },
+    { lat: 10.602665, lng: 122.934780 },
+  ]},
+  // Section L (middle-right)
+  { name: 'L', paths: [
+    { lat: 10.603212, lng: 122.934951 },
+    { lat: 10.603479, lng: 122.935378 },
+    { lat: 10.603145, lng: 122.935542 },
+    { lat: 10.602907, lng: 122.935155 },
+  ]},
+  // Section M (bottom-left)
+  { name: 'M', paths: [
+    { lat: 10.602665, lng: 122.934780 },
+    { lat: 10.602907, lng: 122.935155 },
+    { lat: 10.602749, lng: 122.935259 },
+    { lat: 10.602397, lng: 122.934993 },
+  ]},
+  // Section N (bottom-right)
+  { name: 'N', paths: [
+    { lat: 10.602907, lng: 122.935155 },
+    { lat: 10.603145, lng: 122.935542 },
+    { lat: 10.603138, lng: 122.935544 },
+    { lat: 10.602749, lng: 122.935259 },
+  ]},
+  // === Aster Estate C (Far right area) - 2 columns × 3 rows ===
+  // Section O (top-left)
+  { name: 'O', paths: [
+    { lat: 10.603091, lng: 122.935621 },
+    { lat: 10.602707, lng: 122.935327 },
+    { lat: 10.602492, lng: 122.935637 },
+    { lat: 10.602897, lng: 122.935943 },
+  ]},
+  // Section P (top-right)
+  { name: 'P', paths: [
+    { lat: 10.602707, lng: 122.935327 },
+    { lat: 10.602336, lng: 122.935053 },
+    { lat: 10.602170, lng: 122.935403 },
+    { lat: 10.602492, lng: 122.935637 },
+  ]},
+  // Section Q (middle-left)
+  { name: 'Q', paths: [
+    { lat: 10.602897, lng: 122.935943 },
+    { lat: 10.602492, lng: 122.935637 },
+    { lat: 10.602276, lng: 122.935947 },
+    { lat: 10.602697, lng: 122.936258 },
+  ]},
+  // Section R (middle-right)
+  { name: 'R', paths: [
+    { lat: 10.602492, lng: 122.935637 },
+    { lat: 10.602170, lng: 122.935403 },
+    { lat: 10.602015, lng: 122.935757 },
+    { lat: 10.602276, lng: 122.935947 },
+  ]},
+  // Section S (bottom-left)
+  { name: 'S', paths: [
+    { lat: 10.602697, lng: 122.936258 },
+    { lat: 10.602276, lng: 122.935947 },
+    { lat: 10.602092, lng: 122.936206 },
+    { lat: 10.602687, lng: 122.936267 },
+  ]},
+  // Section T (bottom-right)
+  { name: 'T', paths: [
+    { lat: 10.602276, lng: 122.935947 },
+    { lat: 10.602015, lng: 122.935757 },
+    { lat: 10.601830, lng: 122.936176 },
+    { lat: 10.602092, lng: 122.936206 },
+  ]},
+  // === Aster Estate D (small bottom section) ===
+  { name: 'U', paths: [
+    { lat: 10.601958, lng: 122.935683 },
+    { lat: 10.601746, lng: 122.936152 },
+    { lat: 10.601612, lng: 122.936097 },
+    { lat: 10.601808, lng: 122.935660 },
+  ]},
+  // === Aster Estate E (bottom rectangular lots) ===
+  // Section V (top)
+  { name: 'V', paths: [
+    { lat: 10.601736, lng: 122.935642 },
+    { lat: 10.601197, lng: 122.935556 },
+    { lat: 10.601187, lng: 122.935772 },
+    { lat: 10.601648, lng: 122.935854 },
+  ]},
+  // Section W (bottom)
+  { name: 'W', paths: [
+    { lat: 10.601648, lng: 122.935854 },
+    { lat: 10.601187, lng: 122.935772 },
+    { lat: 10.601182, lng: 122.935922 },
+    { lat: 10.601552, lng: 122.936074 },
+  ]},
+];
 
 const IMAGE_BASE = 'http://localhost/ForestLake/forest-lake-api';
 
@@ -125,8 +365,9 @@ function LotSidebar({ lot, onClose, closing }) {
         <div className="space-y-3">
           <div className="bg-gray-50 rounded-lg p-3 space-y-2">
             <DetailRow label="Lot Number" value={lot.lot_number} />
-            <DetailRow label="Section" value={lot.section} />
             <DetailRow label="Block" value={lot.block} />
+            <DetailRow label="Section" value={lot.section} />
+            <DetailRow label="Area" value={lot.square_meter ? `${lot.square_meter} m²` : '—'} />
           </div>
 
           {lot.description && (
@@ -213,6 +454,12 @@ export default function CemeteryMap({ lots = [], height = '500px', onMapClick })
           restriction={{ latLngBounds: RESTRICTION, strictBounds: true }}
           minZoom={16}
           maxZoom={21}
+          styles={[
+            { featureType: 'all', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+            { featureType: 'administrative', stylers: [{ visibility: 'off' }] },
+            { featureType: 'administrative.land_parcel', stylers: [{ visibility: 'off' }] },
+            { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+          ]}
           onClick={(e) => {
             if (!isEditMode) closeSidebar();
             if (onMapClick && e.detail?.latLng) {
@@ -220,6 +467,45 @@ export default function CemeteryMap({ lots = [], height = '500px', onMapClick })
             }
           }}
         >
+          {/* Block borders (thicker, red like site plan) */}
+          {BLOCK_BOUNDARIES.map((block) => (
+            <Polygon
+              key={block.name}
+              paths={block.paths}
+              fillColor="#ff0000"
+              fillOpacity={0.03}
+              strokeColor="#ef4444"
+              strokeWeight={3}
+              strokeOpacity={0.9}
+            />
+          ))}
+
+          {/* Section borders (red, matching the site plan style) */}
+          {SECTION_BOUNDARIES.map((section) => (
+            <Polygon
+              key={section.name}
+              paths={section.paths}
+              fillColor="#ff0000"
+              fillOpacity={0.05}
+              strokeColor="#ef4444"
+              strokeWeight={2}
+              strokeOpacity={0.8}
+            />
+          ))}
+
+          {/* Section labels */}
+          {SECTION_BOUNDARIES.map((section) => {
+            const centerLat = section.paths.reduce((sum, p) => sum + p.lat, 0) / section.paths.length;
+            const centerLng = section.paths.reduce((sum, p) => sum + p.lng, 0) / section.paths.length;
+            return (
+              <AdvancedMarker key={`label-${section.name}`} position={{ lat: centerLat, lng: centerLng }} zIndex={5}>
+                <div className="bg-white/80 text-red-700 font-bold text-xs px-2 py-1 rounded shadow-sm border border-red-200 pointer-events-none">
+                  {section.name}
+                </div>
+              </AdvancedMarker>
+            );
+          })}
+
           {lots.map(lot => (
             lot.latitude && lot.longitude && (
               <LotPin key={lot.id} lot={lot} onClick={openSidebar} clickable={!isEditMode} />

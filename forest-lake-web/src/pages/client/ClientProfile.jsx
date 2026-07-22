@@ -24,38 +24,40 @@ export default function ClientProfile() {
       toast.success('Profile updated!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-primary-dark mb-6">My Profile</h1>
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
+    <div className="max-w-2xl animate-fade-in-up">
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Profile</h1>
+        <p className="text-gray-500 mt-1">Update your personal information.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-7 border border-gray-100 space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-            <input type="text" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name</label>
+            <input type="text" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} className="input-modern" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
-            <input type="text" value={form.middle_name} onChange={e => setForm({ ...form, middle_name: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle Name</label>
+            <input type="text" value={form.middle_name} onChange={e => setForm({ ...form, middle_name: e.target.value })} className="input-modern" />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-          <input type="text" value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name</label>
+          <input type="text" value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} className="input-modern" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-          <input type="tel" value={form.contact_number} onChange={e => setForm({ ...form, contact_number: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Number</label>
+          <input type="tel" value={form.contact_number} onChange={e => setForm({ ...form, contact_number: e.target.value })} className="input-modern" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-          <input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
+          <input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="input-modern" />
         </div>
-        <button type="submit" disabled={loading} className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-lg font-medium transition disabled:opacity-50">
+        <button type="submit" disabled={loading} className="btn-primary">
           {loading ? 'Saving...' : 'Update Profile'}
         </button>
       </form>

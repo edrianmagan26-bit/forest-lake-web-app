@@ -51,9 +51,13 @@ export default function AdminReservations() {
   if (loading) return <TableSkeleton />;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-primary-dark mb-6">Reservation Management</h1>
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+    <div className="animate-fade-in-up">
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reservations</h1>
+        <p className="text-gray-500 mt-1">Review and manage reservation requests.</p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="flex-1"><SearchBar onSearch={setSearch} placeholder="Search reservations..." /></div>
         <FilterDropdown label="All Statuses" value={statusFilter} onChange={setStatusFilter} options={[
           { value: 'pending', label: 'Pending' },
@@ -63,30 +67,32 @@ export default function AdminReservations() {
         ]} />
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-gray-50/80">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">ID</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Client</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Lot</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Date</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Actions</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">ID</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Client</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Lot</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Date</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Status</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-50">
               {filtered.map(r => (
-                <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">#{r.id}</td>
-                  <td className="px-4 py-3">{r.client_name || 'N/A'}</td>
-                  <td className="px-4 py-3">{r.lot_number} ({r.section})</td>
-                  <td className="px-4 py-3 text-gray-500">{formatDate(r.reservation_date || r.created_at)}</td>
-                  <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
-                  <td className="px-4 py-3">
+                <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-5 py-4 font-mono text-gray-500">#{r.id}</td>
+                  <td className="px-5 py-4 font-medium text-gray-900">{r.client_name || 'N/A'}</td>
+                  <td className="px-5 py-4 text-gray-600">{r.lot_number} <span className="text-gray-400">({r.section})</span></td>
+                  <td className="px-5 py-4 text-gray-500">{formatDate(r.reservation_date || r.created_at)}</td>
+                  <td className="px-5 py-4"><StatusBadge status={r.status} /></td>
+                  <td className="px-5 py-4">
                     {r.status === 'pending' && (
-                      <button onClick={() => { setSelected(r); setRemarks(''); }} className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg hover:bg-blue-200">Review</button>
+                      <button onClick={() => { setSelected(r); setRemarks(''); }} className="text-xs bg-blue-50 text-blue-600 px-3.5 py-1.5 rounded-lg font-medium hover:bg-blue-100 border border-blue-100 transition">
+                        Review
+                      </button>
                     )}
                   </td>
                 </tr>
@@ -94,23 +100,23 @@ export default function AdminReservations() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && <p className="text-center text-gray-500 py-8">No reservations found.</p>}
+        {filtered.length === 0 && <div className="text-center py-16"><p className="text-gray-400 text-sm">No reservations found.</p></div>}
       </div>
 
       {selected && (
         <Modal title={`Review Reservation #${selected.id}`} onClose={() => setSelected(null)}>
-          <div className="text-sm space-y-2 mb-4">
-            <p><span className="font-medium">Client:</span> {selected.client_name}</p>
-            <p><span className="font-medium">Lot:</span> {selected.lot_number} | Section: {selected.section} | Block: {selected.block}</p>
-            <p><span className="font-medium">Requested:</span> {formatDate(selected.reservation_date || selected.created_at)}</p>
+          <div className="bg-gray-50 rounded-xl p-4 mb-5 space-y-2">
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Client</span><span className="font-medium text-gray-900">{selected.client_name}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Lot</span><span className="font-medium">{selected.lot_number} · {selected.section} · {selected.block}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Requested</span><span className="font-medium">{formatDate(selected.reservation_date || selected.created_at)}</span></div>
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Admin Remarks</label>
-            <textarea value={remarks} onChange={e => setRemarks(e.target.value)} rows="3" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="Optional remarks..." />
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Admin Remarks</label>
+            <textarea value={remarks} onChange={e => setRemarks(e.target.value)} rows="3" className="input-modern resize-none" placeholder="Optional remarks..." />
           </div>
           <div className="flex gap-3">
-            <button onClick={() => handleAction('decline')} disabled={processing} className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition disabled:opacity-50">Decline</button>
-            <button onClick={() => handleAction('approve')} disabled={processing} className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition disabled:opacity-50">Approve</button>
+            <button onClick={() => handleAction('decline')} disabled={processing} className="flex-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 py-3 rounded-xl font-semibold transition disabled:opacity-50">Decline</button>
+            <button onClick={() => handleAction('approve')} disabled={processing} className="flex-1 btn-primary">Approve</button>
           </div>
         </Modal>
       )}

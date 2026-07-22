@@ -5,21 +5,12 @@ import LoginModal from '../../components/LoginModal';
 import RegisterModal from '../../components/RegisterModal';
 
 const features = [
-  { icon: '📂', title: 'Digital Client Records', desc: 'Centralized and organized client information management.' },
-  { icon: '🗺️', title: 'Burial Lot Management', desc: 'Monitor available, reserved, and occupied burial lots in real-time.' },
-  { icon: '📍', title: 'Geo-Tagged Cemetery Map', desc: 'Locate burial lots using an interactive map with coordinates.' },
-  { icon: '📋', title: 'Reservation Management', desc: 'Submit and monitor burial lot reservation requests online.' },
-  { icon: '🔒', title: 'Secure Account Management', desc: 'Role-based access with email verification and secure auth.' },
-  { icon: '👥', title: 'User Management', desc: 'Admin tools to manage client accounts and system access.' },
-];
-
-const steps = [
-  { num: '01', title: 'Create an Account', desc: 'Register with your personal information' },
-  { num: '02', title: 'Verify Your Email', desc: 'Confirm your email to activate' },
-  { num: '03', title: 'Explore Burial Lots', desc: 'Browse available lots on the map' },
-  { num: '04', title: 'Select a Lot', desc: 'Choose your preferred burial lot' },
-  { num: '05', title: 'Request Reservation', desc: 'Submit your reservation request' },
-  { num: '06', title: 'Track Status', desc: 'Monitor your reservation progress' },
+  { icon: '🌳', title: 'Peaceful Grounds', desc: 'Beautifully landscaped gardens and well-maintained pathways for a serene atmosphere.' },
+  { icon: '🗺️', title: 'Organized Sections', desc: 'Clearly mapped burial sections for easy navigation and lot identification.' },
+  { icon: '📍', title: 'Interactive Cemetery Map', desc: 'Locate burial lots using our geo-tagged interactive map.' },
+  { icon: '📋', title: 'Online Reservations', desc: 'Reserve burial lots conveniently through our online platform.' },
+  { icon: '🏛️', title: 'Memorial Services', desc: 'Dedicated spaces and support for honoring loved ones with dignity.' },
+  { icon: '�', title: 'Secure & Accessible', desc: 'Monitored premises with easy access for families and visitors.' },
 ];
 
 export default function LandingPage() {
@@ -36,71 +27,105 @@ export default function LandingPage() {
   return (
     <div className="scroll-smooth">
       {/* ==================== HERO SECTION ==================== */}
-      <section id="home" className="relative bg-gradient-to-br from-primary-dark via-primary to-primary-mid text-white overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-72 sm:h-72 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+      <section id="home" className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-primary-dark via-primary-mid to-primary">
+        {/* Animated background shapes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-primary-light/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }}></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full"></div>
+          {/* Grid pattern */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.03%22%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
+        </div>
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-28 lg:py-36">
-          <div className="text-center">
-            <span className="inline-block text-4xl sm:text-5xl mb-4">🌲</span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 leading-tight">
-              Forest Lake Sum-ag
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-8 animate-fade-in-up">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              <span className="text-green-100 text-sm font-medium">Cemetery Management System</span>
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-[1.1] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+              Forest Lake
+              <span className="block text-primary-light">Memorial Park</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-green-100 mb-2 sm:mb-3 font-medium">
-              Cemetery Client Management System with Geo-Tagging
+            
+            <p className="text-lg sm:text-xl text-green-100/80 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              A peaceful and well-maintained resting place in Sum-ag, Bacolod City — honoring lives with dignity, care, and respect.
             </p>
-            <p className="text-sm sm:text-base text-green-200/80 max-w-xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
-              Manage burial lot reservations, client records, and cemetery locations in one organized platform for Forest Lake Memorial Park, Sum-ag, Bacolod City.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
-              <a href="#map" className="w-full sm:w-auto bg-white text-primary-dark px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl font-semibold hover:bg-green-50 transition shadow-lg text-center">
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <a href="#map" className="w-full sm:w-auto bg-white text-primary-dark px-8 py-4 rounded-2xl font-semibold hover:bg-green-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-center">
                 Explore Burial Lots
               </a>
-              <button onClick={() => setShowLogin(true)} className="w-full sm:w-auto border-2 border-white/80 text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl font-semibold hover:bg-white/10 transition text-center">
+              <button onClick={() => setShowLogin(true)} className="w-full sm:w-auto border-2 border-white/30 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white/10 backdrop-blur-sm transition-all text-center">
                 Client Login
               </button>
             </div>
-          </div>
-        </div>
 
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 60L48 55C96 50 192 40 288 35C384 30 480 30 576 33.3C672 36.7 768 43.3 864 45C960 46.7 1056 43.3 1152 40C1248 36.7 1344 33.3 1392 31.7L1440 30V60H0Z" fill="white"/>
-          </svg>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-6 mt-16 max-w-md mx-auto animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl font-bold text-white">{lots.length || '—'}</p>
+                <p className="text-xs sm:text-sm text-green-200/70 mt-1">Total Lots</p>
+              </div>
+              <div className="text-center border-x border-white/10">
+                <p className="text-2xl sm:text-3xl font-bold text-white">{lots.filter(l => l.status === 'available').length || '—'}</p>
+                <p className="text-xs sm:text-sm text-green-200/70 mt-1">Available</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl font-bold text-white">24/7</p>
+                <p className="text-xs sm:text-sm text-green-200/70 mt-1">Online</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ==================== ABOUT SECTION ==================== */}
-      <section id="about" className="py-14 sm:py-16 md:py-20 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 sm:mb-10">
-            <span className="inline-block bg-primary/10 text-primary text-xs sm:text-sm font-semibold px-3 py-1 rounded-full mb-3">About Us</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-dark mb-4">About the System</h2>
+      <section id="about" className="py-20 sm:py-28 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">About Us</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">Forest Lake Memorial Park</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">A peaceful resting place nestled in the heart of Sum-ag, Bacolod City.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center">
-            <div className="space-y-4 text-sm sm:text-base text-gray-600 leading-relaxed">
-              <p>
-                The Forest Lake Sum-ag Cemetery Client Management System provides a centralized digital platform
-                for managing client information, burial lot availability, reservations, and Geo-Tagged cemetery locations.
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <p className="text-gray-600 leading-relaxed text-lg">
+                Forest Lake Memorial Park is a well-maintained cemetery located in Sum-ag, Bacolod City. It serves as a serene
+                and dignified final resting place for loved ones, offering families a tranquil environment surrounded by nature.
               </p>
-              <p>
-                This system addresses common problems with manual cemetery record management including difficult record
-                searching, data redundancy, delayed updates, and difficulty locating burial lots.
+              <p className="text-gray-600 leading-relaxed">
+                The memorial park features organized burial sections, well-kept landscapes, and accessible pathways, ensuring
+                that visitors can pay their respects in a peaceful setting.
               </p>
-              <p>
-                It combines client management, reservation management, burial lot monitoring, and Geo-Tagging into one
-                integrated platform for Forest Lake Memorial Park.
+              <p className="text-gray-600 leading-relaxed">
+                With a commitment to providing compassionate service, Forest Lake Memorial Park continues to serve the
+                community with care, respect, and professionalism.
               </p>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-primary/5 rounded-2xl p-6 sm:p-8 border border-green-100">
-              <h3 className="font-semibold text-primary-dark mb-4 text-base sm:text-lg">System Objectives</h3>
-              <ul className="space-y-3 text-sm text-gray-600">
-                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span> Centralized digital client database</li>
-                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span> Real-time burial lot status monitoring</li>
-                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span> Map-based Geo-Tagging for lot location</li>
-                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span> Reduce manual errors and improve efficiency</li>
-                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span> Easy-to-use reservation platform</li>
-                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span> Efficient admin management tools</li>
+
+            <div className="bg-gradient-to-br from-primary/5 to-primary-light/20 rounded-3xl p-8 border border-primary/10">
+              <h3 className="font-bold text-gray-900 mb-6 text-lg">Why Choose Forest Lake</h3>
+              <ul className="space-y-4">
+                {[
+                  'Peaceful and well-maintained grounds',
+                  'Organized and accessible burial sections',
+                  'Beautiful landscaped surroundings',
+                  'Convenient location in Sum-ag, Bacolod City',
+                  'Compassionate and professional service',
+                  'Secure and monitored premises',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <span className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                      <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    <span className="text-gray-700">{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -108,42 +133,22 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== FEATURES SECTION ==================== */}
-      <section id="features" className="py-14 sm:py-16 md:py-20 px-4 bg-gray-50">
+      <section id="features" className="py-20 sm:py-28 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10 sm:mb-12">
-            <span className="inline-block bg-primary/10 text-primary text-xs sm:text-sm font-semibold px-3 py-1 rounded-full mb-3">Features</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-dark mb-3">System Features</h2>
-            <p className="text-sm sm:text-base text-gray-500 max-w-lg mx-auto">Comprehensive tools to streamline cemetery management operations.</p>
+          <div className="text-center mb-16">
+            <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">Features</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">What We Offer</h2>
+            <p className="text-gray-500 max-w-lg mx-auto">Providing families a dignified and well-cared-for resting place for their loved ones.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
             {features.map((f, i) => (
-              <div key={i} className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-primary/20 group">
-                <div className="text-3xl sm:text-4xl mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
-                <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{f.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== HOW IT WORKS SECTION ==================== */}
-      <section className="py-14 sm:py-16 md:py-20 px-4 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10 sm:mb-12">
-            <span className="inline-block bg-primary/10 text-primary text-xs sm:text-sm font-semibold px-3 py-1 rounded-full mb-3">Process</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-dark mb-3">How It Works</h2>
-            <p className="text-sm sm:text-base text-gray-500">Simple steps to get started with the system.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {steps.map((s, i) => (
-              <div key={i} className="relative bg-gradient-to-br from-white to-green-50/50 rounded-2xl p-5 sm:p-6 border border-gray-100 hover:border-primary/30 transition-all group">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl sm:text-3xl font-bold text-primary/30 group-hover:text-primary/60 transition">{s.num}</span>
-                  <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent"></div>
+              <div key={i} className="group relative bg-surface rounded-2xl p-7 border border-gray-100 card-hover">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative">
+                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
+                  <h3 className="font-bold text-gray-900 mb-2 text-lg">{f.title}</h3>
+                  <p className="text-gray-500 leading-relaxed">{f.desc}</p>
                 </div>
-                <h3 className="font-semibold text-gray-800 text-sm sm:text-base mb-1">{s.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-500">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -151,47 +156,55 @@ export default function LandingPage() {
       </section>
 
       {/* ==================== CEMETERY MAP SECTION ==================== */}
-      <section id="map" className="py-14 sm:py-16 md:py-20 px-4 bg-gray-50">
+      <section id="map" className="py-20 sm:py-28 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8 sm:mb-10">
-            <span className="inline-block bg-primary/10 text-primary text-xs sm:text-sm font-semibold px-3 py-1 rounded-full mb-3">Cemetery Map</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-dark mb-3">Geo-Tagged Burial Lots</h2>
-            <p className="text-sm sm:text-base text-gray-500 max-w-lg mx-auto">Explore burial lot locations on our interactive map.</p>
-            <p className="text-xs text-gray-400 mt-2">Note: Geo-Tagging is for map-based visual location only. It does not provide real-time GPS navigation.</p>
+          <div className="text-center mb-12">
+            <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">Location</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">Find a Burial Lot</h2>
+            <p className="text-gray-500 max-w-lg mx-auto">Browse available lots on our interactive map and find the perfect resting place for your loved ones.</p>
           </div>
 
-          <div className="flex flex-wrap gap-3 sm:gap-5 justify-center mb-5 sm:mb-6 text-xs sm:text-sm">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-available rounded-full"></span> Available</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-reserved rounded-full"></span> Reserved</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-occupied rounded-full"></span> Occupied</span>
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
+            <span className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-full text-sm">
+              <span className="w-3 h-3 bg-available rounded-full shadow-sm shadow-available/50"></span> Available
+            </span>
+            <span className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-full text-sm">
+              <span className="w-3 h-3 bg-reserved rounded-full shadow-sm shadow-reserved/50"></span> Reserved
+            </span>
+            <span className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-full text-sm">
+              <span className="w-3 h-3 bg-occupied rounded-full shadow-sm shadow-occupied/50"></span> Occupied
+            </span>
           </div>
 
-          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-200">
+          <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
             <CemeteryMap lots={lots} height="500px" />
           </div>
         </div>
       </section>
 
-      {/* ==================== LOGIN / REGISTER CTA SECTION ==================== */}
-      <section id="login" className="py-14 sm:py-16 md:py-20 px-4 bg-gradient-to-br from-primary-dark via-primary-accent to-primary-mid text-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-40 h-40 sm:w-64 sm:h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-56 h-56 sm:w-80 sm:h-80 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
+      {/* ==================== CTA SECTION ==================== */}
+      <section id="login" className="py-20 sm:py-28 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary-mid to-primary"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.03%22%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
 
         <div className="relative max-w-3xl mx-auto text-center">
-          <span className="inline-block text-3xl sm:text-4xl mb-3">🔐</span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Get Started Today</h2>
-          <p className="text-sm sm:text-base text-green-100/80 max-w-md mx-auto mb-8 sm:mb-10 leading-relaxed">
-            Create your account or log in to manage burial lot reservations, view available lots, and track your reservation status.
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-8">
+            <span className="text-lg">🔐</span>
+            <span className="text-green-100 text-sm font-medium">Get Started</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Ready to Get Started?</h2>
+          <p className="text-green-100/80 max-w-md mx-auto mb-10 text-lg leading-relaxed">
+            Create your account or log in to manage burial lot reservations and track your status.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
-            <button onClick={() => setShowLogin(true)} className="w-full sm:w-auto bg-white text-primary-dark px-8 py-3.5 rounded-xl font-semibold hover:bg-green-50 transition shadow-lg text-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button onClick={() => setShowLogin(true)} className="w-full sm:w-auto bg-white text-primary-dark px-8 py-4 rounded-2xl font-semibold hover:bg-green-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-center">
               Login to Account
             </button>
-            <button onClick={() => setShowRegister(true)} className="w-full sm:w-auto border-2 border-white/80 text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-white/10 transition text-center">
+            <button onClick={() => setShowRegister(true)} className="w-full sm:w-auto border-2 border-white/30 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white/10 backdrop-blur-sm transition-all text-center">
               Create Account
             </button>
           </div>
-          <p className="text-xs text-green-200/60 mt-6">Free registration. Email verification required.</p>
+          <p className="text-xs text-green-200/50 mt-8">Free registration · Email verification required</p>
         </div>
       </section>
 

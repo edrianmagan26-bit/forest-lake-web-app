@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS burial_lots (
     lot_number VARCHAR(50) NOT NULL UNIQUE,
     section VARCHAR(100) NOT NULL,
     block VARCHAR(50) NOT NULL,
+    square_meter DECIMAL(10, 2) DEFAULT NULL,
     latitude DECIMAL(10, 6) DEFAULT NULL,
     longitude DECIMAL(10, 6) DEFAULT NULL,
     status ENUM('available', 'reserved', 'occupied') NOT NULL DEFAULT 'available',

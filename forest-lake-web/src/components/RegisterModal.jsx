@@ -14,53 +14,71 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password !== form.confirm_password) {
-      toast.error('Passwords do not match');
-      return;
-    }
-    if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-    try {
-      await register(form);
-      onClose();
-    } catch { /* handled */ }
+    if (form.password !== form.confirm_password) { toast.error('Passwords do not match'); return; }
+    if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+    try { await register(form); onClose(); } catch { /* handled */ }
   };
 
-  const fields = [
-    { name: 'first_name', label: 'First Name', type: 'text', required: true },
-    { name: 'middle_name', label: 'Middle Name', type: 'text', required: false },
-    { name: 'last_name', label: 'Last Name', type: 'text', required: true },
-    { name: 'contact_number', label: 'Contact Number', type: 'tel', required: true },
-    { name: 'email', label: 'Email Address', type: 'email', required: true },
-    { name: 'address', label: 'Address', type: 'text', required: true },
-    { name: 'password', label: 'Password', type: 'password', required: true },
-    { name: 'confirm_password', label: 'Confirm Password', type: 'password', required: true },
-  ];
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl" aria-label="Close">&times;</button>
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-primary-dark">Create Account</h2>
-          <p className="text-gray-500 mt-1">Join Forest Lake Sum-ag</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto animate-scale-in" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all" aria-label="Close">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">🌲</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
+          <p className="text-gray-500 mt-1 text-sm">Join Forest Lake Sum-ag</p>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {fields.map(f => (
-            <div key={f.name}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}{f.required && <span className="text-red-500">*</span>}</label>
-              <input type={f.type} name={f.name} value={form[f.name]} onChange={handleChange} required={f.required} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder={f.label} />
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name<span className="text-red-400 ml-0.5">*</span></label>
+              <input type="text" name="first_name" value={form.first_name} onChange={handleChange} required className="input-modern" placeholder="First Name" />
             </div>
-          ))}
-          <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary-dark text-white py-2.5 rounded-lg font-medium transition disabled:opacity-50 mt-4">
-            {loading ? 'Creating Account...' : 'Register'}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name<span className="text-red-400 ml-0.5">*</span></label>
+              <input type="text" name="last_name" value={form.last_name} onChange={handleChange} required className="input-modern" placeholder="Last Name" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle Name</label>
+            <input type="text" name="middle_name" value={form.middle_name} onChange={handleChange} className="input-modern" placeholder="Middle Name" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Number<span className="text-red-400 ml-0.5">*</span></label>
+            <input type="tel" name="contact_number" value={form.contact_number} onChange={handleChange} required className="input-modern" placeholder="Contact Number" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address<span className="text-red-400 ml-0.5">*</span></label>
+            <input type="email" name="email" value={form.email} onChange={handleChange} required className="input-modern" placeholder="you@example.com" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Address<span className="text-red-400 ml-0.5">*</span></label>
+            <input type="text" name="address" value={form.address} onChange={handleChange} required className="input-modern" placeholder="Address" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password<span className="text-red-400 ml-0.5">*</span></label>
+              <input type="password" name="password" value={form.password} onChange={handleChange} required className="input-modern" placeholder="••••••••" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm<span className="text-red-400 ml-0.5">*</span></label>
+              <input type="password" name="confirm_password" value={form.confirm_password} onChange={handleChange} required className="input-modern" placeholder="••••••••" />
+            </div>
+          </div>
+          <button type="submit" disabled={loading} className="btn-primary w-full mt-2">
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-4">
+
+        <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{' '}
-          <button onClick={onSwitchToLogin} className="text-primary font-medium hover:underline">Login</button>
+          <button onClick={onSwitchToLogin} className="text-primary font-semibold hover:underline">Sign in</button>
         </p>
       </div>
     </div>

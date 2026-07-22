@@ -39,23 +39,23 @@ export default function ClientBurialLots() {
       await api.post('/reservations/create.php', { burial_lot_id: selectedLot.id });
       toast.success('Reservation request submitted!');
       setSelectedLot(null);
-      // Refresh lots
       const res = await api.get('/burial-lots/list.php');
       setLots(res.data.data || []);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Reservation failed');
-    } finally {
-      setReserving(false);
-    }
+    } finally { setReserving(false); }
   };
 
   if (loading) return <TableSkeleton />;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-primary-dark mb-6">Available Burial Lots</h1>
+    <div className="animate-fade-in-up">
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Burial Lots</h1>
+        <p className="text-gray-500 mt-1">Browse and reserve available burial lots.</p>
+      </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="flex-1"><SearchBar onSearch={setSearch} placeholder="Search by lot number or section..." /></div>
         <FilterDropdown label="All Statuses" value={statusFilter} onChange={setStatusFilter} options={[
           { value: 'available', label: 'Available' },
@@ -64,43 +64,46 @@ export default function ClientBurialLots() {
         ]} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
         {filtered.map(lot => (
-          <div key={lot.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-gray-800">Lot {lot.lot_number}</h3>
+          <div key={lot.id} className="bg-white rounded-2xl p-6 border border-gray-100 card-hover group">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">Lot {lot.lot_number}</h3>
+                <p className="text-sm text-gray-500">Section {lot.section} · Block {lot.block}</p>
+              </div>
               <StatusBadge status={lot.status} />
             </div>
-            <p className="text-sm text-gray-600">Section: {lot.section}</p>
-            <p className="text-sm text-gray-600">Block: {lot.block}</p>
-            {lot.description && <p className="text-sm text-gray-500 mt-2">{lot.description}</p>}
-            {lot.image && (
-              <button onClick={() => setViewingLot(lot)} className="mt-3 w-full bg-blue-50 text-blue-600 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-100 transition">
-                {lot.image_type === '360' ? '🌐 View 360°' : '📷 View Photo'}
-              </button>
-            )}
-            {lot.status === 'available' && (
-              <button onClick={() => setSelectedLot(lot)} className="mt-2 w-full bg-primary hover:bg-primary-dark text-white py-2 rounded-lg text-sm font-medium transition">
-                Request Reservation
-              </button>
-            )}
+            {lot.description && <p className="text-sm text-gray-500 mb-4 leading-relaxed">{lot.description}</p>}
+            <div className="space-y-2">
+              {lot.image && (
+                <button onClick={() => setViewingLot(lot)} className="w-full bg-gray-50 text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-100 transition border border-gray-200 flex items-center justify-center gap-2">
+                  {lot.image_type === '360' ? '🌐 View 360°' : '📷 View Photo'}
+                </button>
+              )}
+              {lot.status === 'available' && (
+                <button onClick={() => setSelectedLot(lot)} className="btn-primary w-full text-sm py-2.5">
+                  Request Reservation
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
-      {filtered.length === 0 && <p className="text-center text-gray-500 py-12">No burial lots found.</p>}
+      {filtered.length === 0 && <div className="text-center py-16"><p className="text-gray-400">No burial lots found.</p></div>}
 
       {selectedLot && (
         <Modal title="Confirm Reservation" onClose={() => setSelectedLot(null)}>
-          <div className="space-y-3 text-sm">
-            <p><span className="font-medium">Lot Number:</span> {selectedLot.lot_number}</p>
-            <p><span className="font-medium">Section:</span> {selectedLot.section}</p>
-            <p><span className="font-medium">Block:</span> {selectedLot.block}</p>
-            <p className="text-gray-600 mt-4">Are you sure you want to request a reservation for this burial lot?</p>
+          <div className="bg-gray-50 rounded-xl p-4 mb-5 space-y-2">
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Lot Number</span><span className="font-medium">{selectedLot.lot_number}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Section</span><span className="font-medium">{selectedLot.section}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Block</span><span className="font-medium">{selectedLot.block}</span></div>
           </div>
-          <div className="flex gap-3 mt-6">
-            <button onClick={() => setSelectedLot(null)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button>
-            <button onClick={handleReservation} disabled={reserving} className="flex-1 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition disabled:opacity-50">
+          <p className="text-sm text-gray-600 mb-5">Are you sure you want to request a reservation for this burial lot?</p>
+          <div className="flex gap-3">
+            <button onClick={() => setSelectedLot(null)} className="btn-secondary flex-1">Cancel</button>
+            <button onClick={handleReservation} disabled={reserving} className="btn-primary flex-1">
               {reserving ? 'Submitting...' : 'Confirm'}
             </button>
           </div>

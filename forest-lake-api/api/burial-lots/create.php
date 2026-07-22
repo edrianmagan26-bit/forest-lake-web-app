@@ -28,11 +28,12 @@ if ($stmt->fetch()) {
 }
 
 try {
-    $stmt = $db->prepare("INSERT INTO burial_lots (lot_number, section, block, latitude, longitude, status, description, created_at, updated_at) VALUES (:lot_number, :section, :block, :latitude, :longitude, :status, :description, NOW(), NOW())");
+    $stmt = $db->prepare("INSERT INTO burial_lots (lot_number, section, block, square_meter, latitude, longitude, status, description, created_at, updated_at) VALUES (:lot_number, :section, :block, :square_meter, :latitude, :longitude, :status, :description, NOW(), NOW())");
     $stmt->execute([
         ':lot_number' => $data['lot_number'],
         ':section' => $data['section'],
         ':block' => $data['block'],
+        ':square_meter' => $data['square_meter'] ?? null,
         ':latitude' => $data['latitude'] ?? null,
         ':longitude' => $data['longitude'] ?? null,
         ':status' => $data['status'] ?? 'available',

@@ -43,10 +43,13 @@ export default function AdminClients() {
   if (loading) return <TableSkeleton />;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-primary-dark mb-6">Client Management</h1>
+    <div className="animate-fade-in-up">
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Client Management</h1>
+        <p className="text-gray-500 mt-1">Manage all registered client accounts.</p>
+      </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="flex-1"><SearchBar onSearch={setSearch} placeholder="Search clients..." /></div>
         <FilterDropdown label="All Statuses" value={statusFilter} onChange={setStatusFilter} options={[
           { value: 'active', label: 'Active' },
@@ -55,31 +58,35 @@ export default function AdminClients() {
         ]} />
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50/80">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Contact</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Verified</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Actions</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Name</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Email</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Contact</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Status</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Verified</th>
+                <th className="text-left px-5 py-4 font-semibold text-gray-600 text-xs uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-50">
               {filtered.map(c => (
-                <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">{c.first_name} {c.last_name}</td>
-                  <td className="px-4 py-3 text-gray-600">{c.email}</td>
-                  <td className="px-4 py-3 text-gray-600">{c.contact_number}</td>
-                  <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
-                  <td className="px-4 py-3">{c.email_verified ? '✅' : '❌'}</td>
-                  <td className="px-4 py-3">
+                <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-5 py-4 font-medium text-gray-900">{c.first_name} {c.last_name}</td>
+                  <td className="px-5 py-4 text-gray-600">{c.email}</td>
+                  <td className="px-5 py-4 text-gray-600">{c.contact_number}</td>
+                  <td className="px-5 py-4"><StatusBadge status={c.status} /></td>
+                  <td className="px-5 py-4">
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${c.email_verified ? 'text-green-600' : 'text-gray-400'}`}>
+                      {c.email_verified ? '✓ Verified' : '✗ No'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
                     <button
                       onClick={() => toggleStatus(c.user_id || c.id, c.status)}
-                      className={`text-xs px-3 py-1 rounded-lg font-medium transition ${c.status === 'active' ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                      className={`text-xs px-3.5 py-1.5 rounded-lg font-medium transition-all ${c.status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100 border border-green-100'}`}
                     >
                       {c.status === 'active' ? 'Deactivate' : 'Activate'}
                     </button>
@@ -89,7 +96,11 @@ export default function AdminClients() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && <p className="text-center text-gray-500 py-8">No clients found.</p>}
+        {filtered.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-gray-400 text-sm">No clients found.</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -17,11 +17,13 @@ export default function AdminDashboard() {
   if (loading) return <CardSkeleton count={8} />;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-primary-dark mb-2">Admin Dashboard</h1>
-      <p className="text-gray-500 mb-8">Overview of cemetery operations.</p>
+    <div className="animate-fade-in-up">
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-500 mt-1">Overview of cemetery operations and key metrics.</p>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 stagger-children">
         <DashboardCard title="Total Clients" value={stats?.total_clients || 0} icon="👥" color="bg-primary" />
         <DashboardCard title="Active Clients" value={stats?.active_clients || 0} icon="✅" color="bg-green-500" />
         <DashboardCard title="Inactive Clients" value={stats?.inactive_clients || 0} icon="⛔" color="bg-gray-500" />
