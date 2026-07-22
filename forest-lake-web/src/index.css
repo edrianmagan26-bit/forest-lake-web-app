@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #266210;
+  --color-primary-dark: #063B00;
+  --color-primary-mid: #276F27;
+  --color-primary-accent: #124D1C;
+  --color-available: #22c55e;
+  --color-reserved: #f59e0b;
+  --color-occupied: #ef4444;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  @apply bg-white text-gray-800 antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+

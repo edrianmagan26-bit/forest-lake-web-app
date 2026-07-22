@@ -1,0 +1,76 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import AdminLayout from './layouts/AdminLayout';
+import ClientLayout from './layouts/ClientLayout';
+
+// Public pages
+import LandingPage from './pages/public/LandingPage';
+import VerifyEmail from './pages/public/VerifyEmail';
+
+// Client pages
+import ClientDashboard from './pages/client/ClientDashboard';
+import ClientProfile from './pages/client/ClientProfile';
+import ClientBurialLots from './pages/client/ClientBurialLots';
+import ClientMap from './pages/client/ClientMap';
+import ClientReservations from './pages/client/ClientReservations';
+import ClientSettings from './pages/client/ClientSettings';
+
+// Admin pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminClients from './pages/admin/AdminClients';
+import AdminBurialLots from './pages/admin/AdminBurialLots';
+import AdminBurialLotsMap from './pages/admin/AdminBurialLotsMap';
+import AdminReservations from './pages/admin/AdminReservations';
+import AdminSettings from './pages/admin/AdminSettings';
+
+function PublicLayout({ children }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
+          <Route path="/about" element={<PublicLayout><LandingPage /></PublicLayout>} />
+          <Route path="/features" element={<PublicLayout><LandingPage /></PublicLayout>} />
+          <Route path="/map-preview" element={<PublicLayout><LandingPage /></PublicLayout>} />
+          <Route path="/verify-email" element={<PublicLayout><VerifyEmail /></PublicLayout>} />
+
+          {/* Client routes */}
+          <Route path="/client" element={<ProtectedRoute allowedRole="client"><ClientLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<ClientDashboard />} />
+            <Route path="profile" element={<ClientProfile />} />
+            <Route path="burial-lots" element={<ClientBurialLots />} />
+            <Route path="map" element={<ClientMap />} />
+            <Route path="reservations" element={<ClientReservations />} />
+            <Route path="settings" element={<ClientSettings />} />
+          </Route>
+
+          {/* Admin routes */}
+          <Route path="/admin" element={<ProtectedRoute allowedRole="admin"><AdminLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="clients" element={<AdminClients />} />
+            <Route path="burial-lots" element={<AdminBurialLots />} />
+            <Route path="burial-lots/map" element={<AdminBurialLotsMap />} />
+            <Route path="reservations" element={<AdminReservations />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

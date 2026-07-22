@@ -1,0 +1,5 @@
+# Allow direct access to uploaded images
+Options -Indexes
+<FilesMatch "\.(jpg|jpeg|png|webp)$">
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
