@@ -6,15 +6,15 @@ require_once '../../config/auth.php';
 $db = (new Database())->getConnection();
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (empty($data['email']) || empty($data['password']) || empty($data['role'])) {
+if (empty($data['email']) || empty($data['password'])) {
     http_response_code(400);
-    echo json_encode(['message' => 'Email, password, and role are required']);
+    echo json_encode(['message' => 'Email and password are required']);
     exit;
 }
 
-// Find user
-$stmt = $db->prepare("SELECT * FROM users WHERE email = :email AND role = :role");
-$stmt->execute([':email' => $data['email'], ':role' => $data['role']]);
+// Find user by email (auto-detect role)
+$stmt = $db->prepare("SELECT * FROM users WHERE email = :email");
+$stmt->execute([':email' => $data['email']]);
 $user = $stmt->fetch();
 
 if (!$user || !password_verify($data['password'], $user['password'])) {

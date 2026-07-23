@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import LoginModal from '../../components/LoginModal';
-import RegisterModal from '../../components/RegisterModal';
+import { Link } from 'react-router-dom';
 
 import h1 from '../../assets/home/h1.jpg';
 import h2 from '../../assets/home/h2.jpg';
@@ -16,8 +15,6 @@ import forestLakeLogo from '../../assets/global/forest-lake-logo-white.png';
 const images = [h1, h2, h3, h4, h5, h6, h7, h8, h9];
 
 export default function LandingPage() {
-  const [showLogin, setShowLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
   const [current, setCurrent] = useState(0);
 
   const nextImage = useCallback(() => {
@@ -114,19 +111,16 @@ export default function LandingPage() {
               </li>
             </ul>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button onClick={() => setShowLogin(true)} className="bg-white text-primary-dark px-8 py-4 rounded-2xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-green-50 text-center">
+              <Link to="/login" className="bg-white text-primary-dark px-8 py-4 rounded-2xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 hover:bg-green-50 text-center">
                 Login
-              </button>
-              <button onClick={() => setShowRegister(true)} className="border-2 border-white/40 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/10 transition-all text-center">
+              </Link>
+              <Link to="/register" className="border-2 border-white/40 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/10 transition-all text-center">
                 Create Account
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
-
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onSwitchToRegister={() => { setShowLogin(false); setShowRegister(true); }} />}
-      {showRegister && <RegisterModal onClose={() => setShowRegister(false)} onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }} />}
     </div>
   );
 }

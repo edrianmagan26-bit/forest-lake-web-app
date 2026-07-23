@@ -31,7 +31,7 @@ html {
 }
 
 .glass-dark {
-  background: rgba(5, 46, 22, 0.85);
+  background: rgba(5, 46, 22, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
