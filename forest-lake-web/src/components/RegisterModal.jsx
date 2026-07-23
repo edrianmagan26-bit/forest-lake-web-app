@@ -28,7 +28,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
 
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🌲</span>
+            <img src="/src/assets/global/forest-lake-logo-white.png" alt="Forest Lake" className="h-8 w-auto" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
           <p className="text-gray-500 mt-1 text-sm">Join Forest Lake Sum-ag</p>

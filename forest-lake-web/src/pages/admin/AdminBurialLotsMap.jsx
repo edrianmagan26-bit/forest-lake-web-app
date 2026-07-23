@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import api from '../../utils/api';
 import CemeteryMap from '../../components/CemeteryMap';
-import Modal from '../../components/Modal';
+import { findSectionAtPoint } from '../../components/CemeteryMap';
 import { MapSkeleton } from '../../components/LoadingSkeleton';
 import toast from 'react-hot-toast';
 
 export default function AdminBurialLotsMap() {
   const [lots, setLots] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ lot_number: '', section: '', block: '', square_meter: '', latitude: '', longitude: '', status: 'available', description: '' });
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [form, setForm] = useState({ lot_number: '', section: '', block: '', square_meter: '', lot_type: 'lawn', latitude: '', longitude: '', status: 'available', description: '' });
   const [saving, setSaving] = useState(false);
   const [coordMode, setCoordMode] = useState(false);
   const [coords, setCoords] = useState([]);
@@ -19,14 +20,42 @@ export default function AdminBurialLotsMap() {
   };
   useEffect(fetchLots, []);
 
+  const openSidebar = (formData) => {
+    setForm(formData);
+    setShowSidebar(true);
+    setClosing(false);
+  };
+
+  const closeSidebar = () => {
+    setClosing(true);
+    setTimeout(() => {
+      setShowSidebar(false);
+      setClosing(false);
+    }, 500);
+  };
+
   const onMapClick = (clickCoords) => {
     if (coordMode) {
       setCoords(prev => [...prev, { lat: clickCoords.lat.toFixed(6), lng: clickCoords.lng.toFixed(6) }]);
       toast.success(`Point ${coords.length + 1}: ${clickCoords.lat.toFixed(6)}, ${clickCoords.lng.toFixed(6)}`);
       return;
     }
-    setForm({ lot_number: '', section: '', block: '', square_meter: '', latitude: clickCoords.lat.toFixed(6), longitude: clickCoords.lng.toFixed(6), status: 'available', description: '' });
-    setShowModal(true);
+    const result = findSectionAtPoint(clickCoords.lat, clickCoords.lng);
+    if (!result) {
+      toast.error('Please click inside a section to add a lot.');
+      return;
+    }
+    openSidebar({
+      lot_number: '',
+      section: result.section,
+      block: result.block,
+      square_meter: '',
+      lot_type: 'lawn',
+      latitude: clickCoords.lat.toFixed(6),
+      longitude: clickCoords.lng.toFixed(6),
+      status: 'available',
+      description: '',
+    });
   };
 
   const handleSave = async (e) => {
@@ -35,7 +64,7 @@ export default function AdminBurialLotsMap() {
     try {
       await api.post('/burial-lots/create.php', form);
       toast.success('Burial lot created!');
-      setShowModal(false);
+      closeSidebar();
       fetchLots();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
     finally { setSaving(false); }
@@ -47,7 +76,7 @@ export default function AdminBurialLotsMap() {
     <div className="animate-fade-in-up">
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cemetery Map</h1>
-        <p className="text-gray-500 mt-1">Click the map to add a new burial lot at that location.</p>
+        <p className="text-gray-500 mt-1">Click inside a section to add a new burial lot.</p>
       </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
@@ -68,7 +97,6 @@ export default function AdminBurialLotsMap() {
         </button>
       </div>
 
-      {/* Coordinate picker results */}
       {coordMode && coords.length > 0 && (
         <div className="mb-4 bg-gray-900 text-green-400 rounded-xl p-4 font-mono text-xs overflow-x-auto">
           <div className="flex justify-between items-center mb-2">
@@ -81,40 +109,74 @@ export default function AdminBurialLotsMap() {
         </div>
       )}
 
-      <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-        <CemeteryMap lots={lots} height="550px" onMapClick={onMapClick} />
-      </div>
+      <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+        <CemeteryMap lots={lots} height="550px" onMapClick={onMapClick} isAdmin={true} />
 
-      {showModal && (
-        <Modal title="Add Burial Lot" onClose={() => setShowModal(false)}>
-          <div className="bg-gray-50 rounded-xl p-3 mb-4 flex items-center gap-2 text-xs text-gray-600">
-            <span>📍</span> Lat: {form.latitude}, Lng: {form.longitude}
+        {/* Add Lot Sidebar */}
+        {showSidebar && (
+          <div className={`absolute top-0 right-0 h-full w-80 max-w-[85%] bg-white shadow-2xl z-50 flex flex-col overflow-hidden transition-transform duration-500 ease-out ${closing ? 'translate-x-full' : 'translate-x-0'}`}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 shrink-0">
+              <h3 className="font-bold text-primary-dark text-sm">Add Burial Lot</h3>
+              <button onClick={closeSidebar} className="text-gray-400 hover:text-gray-600 text-xl leading-none" aria-label="Close">&times;</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  <span className="text-xs font-semibold text-primary-dark">Pin Location</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-white rounded-lg px-2.5 py-1.5 border border-gray-100">
+                    <span className="text-[10px] text-gray-400 block">Latitude</span>
+                    <span className="text-xs font-mono text-gray-800">{form.latitude}</span>
+                  </div>
+                  <div className="bg-white rounded-lg px-2.5 py-1.5 border border-gray-100">
+                    <span className="text-[10px] text-gray-400 block">Longitude</span>
+                    <span className="text-xs font-mono text-gray-800">{form.longitude}</span>
+                  </div>
+                </div>
+              </div>
+              <form onSubmit={handleSave} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Lot Number</label>
+                  <input type="text" value={form.lot_number} onChange={e => setForm({...form, lot_number: e.target.value})} required className="input-modern" placeholder="Enter lot number" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Block</label>
+                    <input type="text" value={form.block} readOnly className="input-modern bg-gray-100 cursor-not-allowed text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Section</label>
+                    <input type="text" value={form.section} readOnly className="input-modern bg-gray-100 cursor-not-allowed text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Area (m²)</label>
+                  <input type="number" step="0.01" min="0" value={form.square_meter} onChange={e => setForm({...form, square_meter: e.target.value})} className="input-modern" placeholder="e.g. 2.5" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Lot Type</label>
+                  <select value={form.lot_type} onChange={e => setForm({...form, lot_type: e.target.value})} className="input-modern">
+                    <option value="lawn">Lawn Lot</option>
+                    <option value="mini_mausoleum">Mini-Mausoleum</option>
+                    <option value="estate">Estate Lot</option>
+                    <option value="legacy">Legacy Lot</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                  <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="input-modern resize-none" rows="2" placeholder="Optional description" />
+                </div>
+                <button type="submit" disabled={saving} className="btn-primary w-full text-sm">
+                  {saving ? 'Creating...' : 'Create Lot'}
+                </button>
+              </form>
+            </div>
           </div>
-          <form onSubmit={handleSave} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Lot Number</label>
-              <input type="text" value={form.lot_number} onChange={e => setForm({...form, lot_number: e.target.value})} required className="input-modern" placeholder="Enter lot number" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Section</label>
-                <input type="text" value={form.section} onChange={e => setForm({...form, section: e.target.value})} required className="input-modern" placeholder="Section" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Block</label>
-                <input type="text" value={form.block} onChange={e => setForm({...form, block: e.target.value})} required className="input-modern" placeholder="Block" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-              <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="input-modern resize-none" rows="2" placeholder="Optional description" />
-            </div>
-            <button type="submit" disabled={saving} className="btn-primary w-full">
-              {saving ? 'Creating...' : 'Create Lot'}
-            </button>
-          </form>
-        </Modal>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -16,12 +16,13 @@ if (empty($data['id'])) {
 }
 
 try {
-    $stmt = $db->prepare("UPDATE burial_lots SET lot_number = :lot_number, section = :section, block = :block, square_meter = :square_meter, latitude = :latitude, longitude = :longitude, status = :status, description = :description, updated_at = NOW() WHERE id = :id");
+    $stmt = $db->prepare("UPDATE burial_lots SET lot_number = :lot_number, section = :section, block = :block, square_meter = :square_meter, lot_type = :lot_type, latitude = :latitude, longitude = :longitude, status = :status, description = :description, updated_at = NOW() WHERE id = :id");
     $stmt->execute([
         ':lot_number' => $data['lot_number'],
         ':section' => $data['section'],
         ':block' => $data['block'],
         ':square_meter' => $data['square_meter'] ?? null,
+        ':lot_type' => $data['lot_type'] ?? 'lawn',
         ':latitude' => $data['latitude'] ?? null,
         ':longitude' => $data['longitude'] ?? null,
         ':status' => $data['status'] ?? 'available',

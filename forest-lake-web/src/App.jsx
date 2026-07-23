@@ -9,6 +9,10 @@ import ClientLayout from './layouts/ClientLayout';
 
 // Public pages
 import LandingPage from './pages/public/LandingPage';
+import AboutPage from './pages/public/AboutPage';
+import FeaturesPage from './pages/public/FeaturesPage';
+import ProductsPage from './pages/public/ProductsPage';
+import MapPreviewPage from './pages/public/MapPreviewPage';
 import VerifyEmail from './pages/public/VerifyEmail';
 
 // Client pages
@@ -45,9 +49,10 @@ export default function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
-          <Route path="/about" element={<PublicLayout><LandingPage /></PublicLayout>} />
-          <Route path="/features" element={<PublicLayout><LandingPage /></PublicLayout>} />
-          <Route path="/map-preview" element={<PublicLayout><LandingPage /></PublicLayout>} />
+          <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
+          <Route path="/features" element={<PublicLayout><FeaturesPage /></PublicLayout>} />
+          <Route path="/products" element={<PublicLayout><ProductsPage /></PublicLayout>} />
+          <Route path="/map-preview" element={<PublicLayout><MapPreviewPage /></PublicLayout>} />
           <Route path="/verify-email" element={<PublicLayout><VerifyEmail /></PublicLayout>} />
 
           {/* Client routes */}

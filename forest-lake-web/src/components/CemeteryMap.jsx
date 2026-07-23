@@ -4,14 +4,14 @@ import StatusBadge from './StatusBadge';
 import api from '../utils/api';
 
 const API_KEY = 'AIzaSyAZlAn5fIIkQobmGUpV0207KVn--oIhhZg';
-const CENTER = { lat: 10.6025, lng: 122.9351 };
+const CENTER = { lat: 10.602369, lng: 122.935156 };
 const MAP_ID = 'forest_lake_map';
 
 const RESTRICTION = {
-  north: 10.6055,
-  south: 10.5995,
-  east: 122.9400,
-  west: 122.9300,
+  north: 10.604334,
+  south: 10.600404,
+  east: 122.937550,
+  west: 122.932761,
 };
 
 const pinColors = {
@@ -262,6 +262,35 @@ const SECTION_BOUNDARIES = [
 
 const IMAGE_BASE = 'http://localhost/ForestLake/forest-lake-api';
 
+// Point-in-polygon ray casting algorithm
+function isPointInPolygon(point, polygon) {
+  let inside = false;
+  const { lat, lng } = point;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].lat, yi = polygon[i].lng;
+    const xj = polygon[j].lat, yj = polygon[j].lng;
+    const intersect = ((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// Find which section and block a coordinate falls within
+export function findSectionAtPoint(lat, lng) {
+  const point = { lat, lng };
+  // Find section
+  const section = SECTION_BOUNDARIES.find(s => isPointInPolygon(point, s.paths));
+  if (!section) return null;
+  // Find block
+  const block = BLOCK_BOUNDARIES.find(b => isPointInPolygon(point, b.paths));
+  return {
+    section: section.name,
+    block: block ? block.name : '',
+  };
+}
+
+export { SECTION_BOUNDARIES, BLOCK_BOUNDARIES };
+
 function LotPin({ lot, onClick, clickable = true }) {
   const color = pinColors[lot.status] || pinColors.available;
   return (
@@ -419,7 +448,7 @@ function DetailRow({ label, value }) {
   );
 }
 
-export default function CemeteryMap({ lots = [], height = '500px', onMapClick }) {
+export default function CemeteryMap({ lots = [], height = '500px', onMapClick, isAdmin = false }) {
   const [selectedLot, setSelectedLot] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -452,7 +481,7 @@ export default function CemeteryMap({ lots = [], height = '500px', onMapClick })
           gestureHandling="cooperative"
           disableDefaultUI={false}
           restriction={{ latLngBounds: RESTRICTION, strictBounds: true }}
-          minZoom={16}
+          minZoom={17}
           maxZoom={21}
           styles={[
             { featureType: 'all', elementType: 'labels', stylers: [{ visibility: 'off' }] },
@@ -467,40 +496,51 @@ export default function CemeteryMap({ lots = [], height = '500px', onMapClick })
             }
           }}
         >
-          {/* Block borders (thicker, red like site plan) */}
+          {/* Block borders */}
           {BLOCK_BOUNDARIES.map((block) => (
             <Polygon
               key={block.name}
               paths={block.paths}
-              fillColor="#ff0000"
-              fillOpacity={0.03}
-              strokeColor="#ef4444"
-              strokeWeight={3}
-              strokeOpacity={0.9}
+              fillColor={isAdmin ? "#ff0000" : "#ffffff"}
+              fillOpacity={isAdmin ? 0.03 : 0.01}
+              strokeColor={isAdmin ? "#ef4444" : "#ffffff"}
+              strokeWeight={isAdmin ? 3 : 1.5}
+              strokeOpacity={isAdmin ? 0.9 : 0.3}
             />
           ))}
 
-          {/* Section borders (red, matching the site plan style) */}
+          {/* Section borders */}
           {SECTION_BOUNDARIES.map((section) => (
             <Polygon
               key={section.name}
               paths={section.paths}
-              fillColor="#ff0000"
-              fillOpacity={0.05}
-              strokeColor="#ef4444"
-              strokeWeight={2}
-              strokeOpacity={0.8}
+              fillColor={isAdmin ? "#ff0000" : "#ffffff"}
+              fillOpacity={isAdmin ? 0.05 : 0.01}
+              strokeColor={isAdmin ? "#ef4444" : "#ffffff"}
+              strokeWeight={isAdmin ? 2 : 1}
+              strokeOpacity={isAdmin ? 0.8 : 0.2}
             />
           ))}
 
-          {/* Section labels */}
+          {/* Section and block labels */}
           {SECTION_BOUNDARIES.map((section) => {
             const centerLat = section.paths.reduce((sum, p) => sum + p.lat, 0) / section.paths.length;
             const centerLng = section.paths.reduce((sum, p) => sum + p.lng, 0) / section.paths.length;
             return (
               <AdvancedMarker key={`label-${section.name}`} position={{ lat: centerLat, lng: centerLng }} zIndex={5}>
-                <div className="bg-white/80 text-red-700 font-bold text-xs px-2 py-1 rounded shadow-sm border border-red-200 pointer-events-none">
+                <div className={`font-bold pointer-events-none ${isAdmin ? 'text-sm bg-white/80 text-red-700 px-2 py-1 rounded shadow-sm border border-red-200' : 'text-lg text-white/60 drop-shadow-md'}`}>
                   {section.name}
+                </div>
+              </AdvancedMarker>
+            );
+          })}
+          {BLOCK_BOUNDARIES.map((block) => {
+            const centerLat = block.paths.reduce((sum, p) => sum + p.lat, 0) / block.paths.length;
+            const centerLng = block.paths.reduce((sum, p) => sum + p.lng, 0) / block.paths.length;
+            return (
+              <AdvancedMarker key={`block-label-${block.name}`} position={{ lat: centerLat, lng: centerLng }} zIndex={4}>
+                <div className={`font-bold pointer-events-none ${isAdmin ? 'text-xs bg-red-600 text-white px-2 py-0.5 rounded shadow' : 'text-xl text-white/50 drop-shadow-lg'}`}>
+                  {block.name}
                 </div>
               </AdvancedMarker>
             );

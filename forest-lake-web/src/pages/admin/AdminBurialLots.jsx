@@ -7,7 +7,7 @@ import Modal from '../../components/Modal';
 import { TableSkeleton } from '../../components/LoadingSkeleton';
 import toast from 'react-hot-toast';
 
-const emptyLot = { lot_number: '', section: '', block: '', square_meter: '', latitude: '', longitude: '', status: 'available', description: '' };
+const emptyLot = { lot_number: '', section: '', block: '', square_meter: '', lot_type: 'lawn', latitude: '', longitude: '', status: 'available', description: '' };
 
 export default function AdminBurialLots() {
   const [lots, setLots] = useState([]);
@@ -200,16 +200,24 @@ export default function AdminBurialLots() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Latitude</label>
-                <input type="text" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} className="input-modern" placeholder="10.6025" />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Lot Type</label>
+                <select value={form.lot_type} onChange={e => setForm({ ...form, lot_type: e.target.value })} className="input-modern">
+                  <option value="lawn">Lawn Lot</option>
+                  <option value="mini_mausoleum">Mini-Mausoleum</option>
+                  <option value="estate">Estate Lot</option>
+                  <option value="legacy">Legacy Lot</option>
+                </select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Latitude</label>
+                <input type="text" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} className="input-modern" placeholder="10.6025" />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Longitude</label>
                 <input type="text" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} className="input-modern" placeholder="122.9345" />
               </div>
-              <div></div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>

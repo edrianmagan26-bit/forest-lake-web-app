@@ -27,7 +27,7 @@ export default function ClientLayout() {
           {/* Logo */}
           <div className="p-6 pb-4">
             <Link to="/client/dashboard" className="flex items-center gap-3">
-              <span className="text-2xl">🌲</span>
+              <img src="/src/assets/global/forest-lake-logo-white.png" alt="Forest Lake" className="h-9 w-auto" />
               <div>
                 <p className="text-white font-bold text-lg leading-tight">Forest Lake</p>
                 <p className="text-green-300/70 text-xs font-medium">Client Portal</p>

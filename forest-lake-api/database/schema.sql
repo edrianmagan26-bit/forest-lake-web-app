@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS burial_lots (
     section VARCHAR(100) NOT NULL,
     block VARCHAR(50) NOT NULL,
     square_meter DECIMAL(10, 2) DEFAULT NULL,
+    lot_type ENUM('lawn', 'mini_mausoleum', 'estate', 'legacy') DEFAULT 'lawn',
     latitude DECIMAL(10, 6) DEFAULT NULL,
     longitude DECIMAL(10, 6) DEFAULT NULL,
     status ENUM('available', 'reserved', 'occupied') NOT NULL DEFAULT 'available',
@@ -96,23 +97,4 @@ CREATE TABLE IF NOT EXISTS system_logs (
 INSERT INTO users (email, password, role, status, email_verified, created_at, updated_at)
 VALUES ('admin@forestlake.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'active', 1, NOW(), NOW());
 
--- Insert sample burial lots (spread across visible cemetery sections)
-INSERT INTO burial_lots (lot_number, section, block, latitude, longitude, status, description) VALUES
--- Upper left green section (Garden A)
-('A-101', 'Garden A', '1', 10.60330, 122.93380, 'available', 'Upper left block, near main path'),
-('A-102', 'Garden A', '2', 10.60320, 122.93400, 'available', 'Upper left block, center area'),
-('A-103', 'Garden A', '3', 10.60310, 122.93350, 'occupied', 'Upper left block, west side'),
-('A-104', 'Garden A', '4', 10.60340, 122.93420, 'available', 'Upper left block, east corner'),
--- Lower left green section (Garden B)
-('B-101', 'Garden B', '1', 10.60260, 122.93360, 'available', 'Lower left section, near entrance'),
-('B-102', 'Garden B', '2', 10.60250, 122.93390, 'reserved', 'Lower left section, center'),
-('B-103', 'Garden B', '3', 10.60270, 122.93410, 'available', 'Lower left section, east side'),
--- Upper right section (Garden C)
-('C-101', 'Garden C', '1', 10.60330, 122.93480, 'available', 'Upper right section, north area'),
-('C-102', 'Garden C', '2', 10.60310, 122.93500, 'occupied', 'Upper right section, center'),
-('C-103', 'Garden C', '3', 10.60300, 122.93520, 'available', 'Upper right section, east side'),
--- Lower right section (Garden D)
-('D-101', 'Garden D', '1', 10.60250, 122.93470, 'available', 'Lower right section, west side'),
-('D-102', 'Garden D', '2', 10.60240, 122.93500, 'reserved', 'Lower right section, center'),
-('D-103', 'Garden D', '3', 10.60230, 122.93530, 'available', 'Lower right section, south corner'),
-('D-104', 'Garden D', '4', 10.60260, 122.93540, 'available', 'Lower right section, east path');
+-- Insert sample burial lots using seed_lots.sql
