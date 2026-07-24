@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -46,6 +47,7 @@ function PublicLayout({ children }) {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
         <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
@@ -78,10 +80,12 @@ export default function App() {
             <Route path="burial-lots" element={<AdminBurialLots />} />
             <Route path="burial-lots/map" element={<AdminBurialLotsMap />} />
             <Route path="reservations" element={<AdminReservations />} />
+            <Route path="reports" element={<AdminReservations />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </ThemeProvider>
   );
 }

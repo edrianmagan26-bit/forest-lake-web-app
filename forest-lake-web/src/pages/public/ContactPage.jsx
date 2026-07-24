@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import toast from 'react-hot-toast';
 
 const RECAPTCHA_SITE_KEY = '6LeoGGEtAAAAAIJsVDCAR9V9SxzzLE9Hqc46Fetz';
 
@@ -11,7 +12,7 @@ export default function ContactPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!captchaValue) { alert('Please complete the reCAPTCHA verification.'); return; }
+    if (!captchaValue) { toast.error('Please complete the reCAPTCHA verification.'); return; }
     setSending(true);
     setTimeout(() => {
       alert('Message sent successfully!');
