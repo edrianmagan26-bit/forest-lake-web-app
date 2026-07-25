@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import usePolling, { updateIfChanged } from '../../hooks/usePolling';
 import StatusBadge from '../../components/StatusBadge';
 import SearchBar from '../../components/SearchBar';
 import FilterDropdown from '../../components/FilterDropdown';
@@ -9,6 +11,7 @@ import { TableSkeleton } from '../../components/LoadingSkeleton';
 import toast from 'react-hot-toast';
 
 export default function ClientBurialLots() {
+  const navigate = useNavigate();
   const [lots, setLots] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +27,12 @@ export default function ClientBurialLots() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  usePolling(() => {
+    api.get('/burial-lots/list.php')
+      .then(res => updateIfChanged(setLots, res.data.data || []))
+      .catch(() => {});
+  });
 
   useEffect(() => {
     let result = lots;
@@ -76,6 +85,12 @@ export default function ClientBurialLots() {
             </div>
             {lot.description && <p className="text-sm text-gray-500 mb-4 leading-relaxed">{lot.description}</p>}
             <div className="space-y-2">
+              {lot.latitude && lot.longitude && (
+                <button onClick={() => navigate('/client/map', { state: { focusLotId: lot.id } })} className="w-full bg-gray-50 text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-100 transition border border-gray-200 flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  Inspect on Map
+                </button>
+              )}
               {lot.image && (
                 <button onClick={() => setViewingLot(lot)} className="w-full bg-gray-50 text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-100 transition border border-gray-200 flex items-center justify-center gap-2">
                   {lot.image_type === '360' ? '🌐 View 360°' : '📷 View Photo'}

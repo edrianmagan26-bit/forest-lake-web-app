@@ -15,7 +15,7 @@ if (empty($data['burial_lot_id'])) {
     exit;
 }
 
-// Check lot is available
+// Check lot exists and is available
 $stmt = $db->prepare("SELECT * FROM burial_lots WHERE id = :id");
 $stmt->execute([':id' => $data['burial_lot_id']]);
 $lot = $stmt->fetch();
@@ -26,31 +26,42 @@ if (!$lot) {
     exit;
 }
 
-if ($lot['status'] !== 'available') {
+if ($lot['status'] === 'occupied') {
     http_response_code(400);
-    echo json_encode(['message' => 'This lot is not available for reservation']);
+    echo json_encode(['message' => 'This lot is fully occupied']);
+    exit;
+}
+
+// Check available slots
+$maxSlots = (int)($lot['max_slots'] ?? 8);
+$stmt = $db->prepare("SELECT COUNT(*) as count FROM reservations WHERE burial_lot_id = :lot_id AND status IN ('pending', 'approved', 'occupied')");
+$stmt->execute([':lot_id' => $data['burial_lot_id']]);
+$count = (int)$stmt->fetch()['count'];
+
+if ($count >= $maxSlots) {
+    http_response_code(400);
+    echo json_encode(['message' => 'No available slots for this lot']);
     exit;
 }
 
 // Check if user already has pending reservation for this lot
-$stmt = $db->prepare("SELECT id FROM reservations WHERE client_id = :client_id AND burial_lot_id = :lot_id AND status = 'pending'");
+$stmt = $db->prepare("SELECT id FROM reservations WHERE client_id = :client_id AND burial_lot_id = :lot_id AND status IN ('pending', 'approved')");
 $stmt->execute([':client_id' => $user['id'], ':lot_id' => $data['burial_lot_id']]);
 if ($stmt->fetch()) {
     http_response_code(400);
-    echo json_encode(['message' => 'You already have a pending reservation for this lot']);
+    echo json_encode(['message' => 'You already have an active reservation for this lot']);
     exit;
 }
 
-// Check if another client has pending/approved reservation for this lot
-$stmt = $db->prepare("SELECT id FROM reservations WHERE burial_lot_id = :lot_id AND status IN ('pending', 'approved')");
-$stmt->execute([':lot_id' => $data['burial_lot_id']]);
-if ($stmt->fetch()) {
-    http_response_code(400);
-    echo json_encode(['message' => 'This lot already has an active reservation']);
-    exit;
-}
+// Generate unique serial number: FL-LOTNUMBER-YYYY-XXXX
+$year = date('Y');
+$lotNumber = str_replace([' ', '-'], '', $lot['lot_number']);
+$stmt = $db->prepare("SELECT COUNT(*) as count FROM reservations WHERE YEAR(created_at) = :year");
+$stmt->execute([':year' => $year]);
+$seq = (int)$stmt->fetch()['count'] + 1;
+$serialNumber = 'FL-' . strtoupper($lotNumber) . '-' . $year . '-' . str_pad($seq, 4, '0', STR_PAD_LEFT);
 
-$stmt = $db->prepare("INSERT INTO reservations (client_id, burial_lot_id, reservation_date, status, created_at, updated_at) VALUES (:client_id, :lot_id, NOW(), 'pending', NOW(), NOW())");
-$stmt->execute([':client_id' => $user['id'], ':lot_id' => $data['burial_lot_id']]);
+$stmt = $db->prepare("INSERT INTO reservations (serial_number, client_id, burial_lot_id, reservation_date, status, created_at, updated_at) VALUES (:serial, :client_id, :lot_id, NOW(), 'pending', NOW(), NOW())");
+$stmt->execute([':serial' => $serialNumber, ':client_id' => $user['id'], ':lot_id' => $data['burial_lot_id']]);
 
-echo json_encode(['message' => 'Reservation request submitted']);
+echo json_encode(['message' => 'Reservation request submitted', 'serial_number' => $serialNumber]);

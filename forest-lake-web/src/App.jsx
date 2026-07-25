@@ -27,12 +27,16 @@ import ClientMap from './pages/client/ClientMap';
 import ClientReservations from './pages/client/ClientReservations';
 import ClientSettings from './pages/client/ClientSettings';
 
+import ClientManageLots from './pages/client/ClientManageLots';
+import ClientHistory from './pages/client/ClientHistory';
+
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminClients from './pages/admin/AdminClients';
 import AdminBurialLots from './pages/admin/AdminBurialLots';
 import AdminBurialLotsMap from './pages/admin/AdminBurialLotsMap';
 import AdminReservations from './pages/admin/AdminReservations';
+import AdminManageLots from './pages/admin/AdminManageLots';
 import AdminSettings from './pages/admin/AdminSettings';
 
 function PublicLayout({ children }) {
@@ -50,7 +54,7 @@ export default function App() {
     <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+        <Toaster position="top-right" toastOptions={{ duration: 3000, style: { borderRadius: '12px', padding: '12px 16px', fontSize: '14px' } }} />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
@@ -70,6 +74,8 @@ export default function App() {
             <Route path="burial-lots" element={<ClientBurialLots />} />
             <Route path="map" element={<ClientMap />} />
             <Route path="reservations" element={<ClientReservations />} />
+            <Route path="manage-lots" element={<ClientManageLots />} />
+            <Route path="history" element={<ClientHistory />} />
             <Route path="settings" element={<ClientSettings />} />
           </Route>
 
@@ -80,6 +86,7 @@ export default function App() {
             <Route path="burial-lots" element={<AdminBurialLots />} />
             <Route path="burial-lots/map" element={<AdminBurialLotsMap />} />
             <Route path="reservations" element={<AdminReservations />} />
+            <Route path="manage-lots" element={<AdminManageLots />} />
             <Route path="reports" element={<AdminReservations />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>

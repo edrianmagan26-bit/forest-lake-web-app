@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../utils/api';
+import usePolling, { updateIfChanged } from '../../hooks/usePolling';
 import StatusBadge from '../../components/StatusBadge';
 import { TableSkeleton } from '../../components/LoadingSkeleton';
 import { formatDate } from '../../utils/helpers';
@@ -10,10 +11,16 @@ export default function ClientReservations() {
 
   useEffect(() => {
     api.get('/reservations/list.php')
-      .then(res => setReservations(res.data.data || []))
+      .then(res => setReservations((res.data.data || []).filter(r => r.status !== 'occupied')))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  usePolling(() => {
+    api.get('/reservations/list.php')
+      .then(res => updateIfChanged(setReservations, (res.data.data || []).filter(r => r.status !== 'occupied')))
+      .catch(() => {});
+  });
 
   if (loading) return <TableSkeleton />;
 
@@ -39,7 +46,7 @@ export default function ClientReservations() {
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <p className="font-bold text-gray-900">Reservation #{r.id}</p>
+                    <p className="font-bold text-gray-900">{r.serial_number || `Reservation #${r.id}`}</p>
                     <StatusBadge status={r.status} />
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">

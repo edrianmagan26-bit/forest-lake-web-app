@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../utils/api';
 import { CardSkeleton } from '../../components/LoadingSkeleton';
+import usePolling, { updateIfChanged } from '../../hooks/usePolling';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#22c55e', '#f59e0b', '#ef4444'];
@@ -15,6 +16,12 @@ export default function AdminDashboard() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  usePolling(() => {
+    api.get('/dashboard/admin.php')
+      .then(res => updateIfChanged(setStats, res.data))
+      .catch(() => {});
+  });
 
   if (loading) return <CardSkeleton count={8} />;
 

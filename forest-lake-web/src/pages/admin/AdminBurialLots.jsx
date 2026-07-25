@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../../utils/api';
+import usePolling, { updateIfChanged } from '../../hooks/usePolling';
 import SearchBar from '../../components/SearchBar';
 import FilterDropdown from '../../components/FilterDropdown';
 import StatusBadge from '../../components/StatusBadge';
@@ -7,7 +8,7 @@ import Modal from '../../components/Modal';
 import { TableSkeleton } from '../../components/LoadingSkeleton';
 import toast from 'react-hot-toast';
 
-const emptyLot = { lot_number: '', section: '', block: '', square_meter: '', lot_type: 'lawn', latitude: '', longitude: '', status: 'available', description: '' };
+const emptyLot = { lot_number: '', section: '', block: '', square_meter: '', max_slots: '8', lot_type: 'lawn', latitude: '', longitude: '', status: 'available', description: '' };
 
 export default function AdminBurialLots() {
   const [lots, setLots] = useState([]);
@@ -32,6 +33,11 @@ export default function AdminBurialLots() {
   };
 
   useEffect(() => { fetchLots(); }, []);
+  usePolling(() => {
+    api.get('/burial-lots/list.php')
+      .then(res => updateIfChanged(setLots, res.data.data || []))
+      .catch(() => {});
+  });
 
   useEffect(() => {
     let result = lots;
@@ -199,6 +205,12 @@ export default function AdminBurialLots() {
                   <option value="occupied">Occupied</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Max Slots (Deceased)</label>
+                <input type="number" min="1" max="20" value={form.max_slots} onChange={e => setForm({ ...form, max_slots: e.target.value })} className="input-modern" placeholder="8" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Lot Type</label>
                 <select value={form.lot_type} onChange={e => setForm({ ...form, lot_type: e.target.value })} className="input-modern">

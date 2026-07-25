@@ -1,6 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { generateOTP, sendVerificationOTP } from '../../utils/emailjs';
+import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import ReCAPTCHA from 'react-google-recaptcha';
 
@@ -14,9 +16,19 @@ export default function RegisterPage() {
     password: '', confirm_password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [step, setStep] = useState('form'); // form, otp, success
   const [captchaValue, setCaptchaValue] = useState(null);
+  const [otp, setOtp] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const recaptchaRef = useRef(null);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => setCooldown(c => c - 1), 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -25,19 +37,95 @@ export default function RegisterPage() {
     if (!captchaValue) { toast.error('Please complete the reCAPTCHA verification.'); return; }
     if (form.password !== form.confirm_password) { toast.error('Passwords do not match'); return; }
     if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-    try { await register(form); setSuccess(true); } catch { /* handled */ }
+
+    setSendingOtp(true);
+    try {
+      // Register the account first (unverified)
+      await register(form);
+
+      // Generate and send OTP
+      const code = generateOTP();
+      await api.post('/auth/store-otp.php', { email: form.email, otp: code, type: 'verification' });
+      await sendVerificationOTP(form.email, code);
+
+      toast.success('OTP sent to your email!');
+      setCooldown(300);
+      setStep('otp');
+    } catch (err) {
+      // Registration might fail if email exists
+    } finally { setSendingOtp(false); }
   };
 
-  if (success) {
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (otp.length !== 6) { toast.error('Enter the 6-digit OTP'); return; }
+    setVerifying(true);
+    try {
+      await api.post('/auth/verify-otp.php', { email: form.email, otp, type: 'verification' });
+      toast.success('Email verified successfully!');
+      setStep('success');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Invalid or expired OTP');
+    } finally { setVerifying(false); }
+  };
+
+  const handleResendOtp = async () => {
+    setSendingOtp(true);
+    try {
+      const code = generateOTP();
+      await api.post('/auth/store-otp.php', { email: form.email, otp: code, type: 'verification' });
+      await sendVerificationOTP(form.email, code);
+      toast.success('New OTP sent!');
+      setCooldown(300);
+    } catch {
+      toast.error('Failed to resend OTP');
+    } finally { setSendingOtp(false); }
+  };
+
+  if (step === 'success') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-10 max-w-md text-center">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-5">
-            <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h2>
-          <p className="text-gray-600 text-sm mb-6">We've sent a verification link. Please verify your email to activate your account.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Verified!</h2>
+          <p className="text-gray-600 text-sm mb-6">Your email has been verified. You can now log in to your account.</p>
           <Link to="/login" className="inline-block bg-primary hover:bg-primary-accent text-white px-6 py-3 rounded-xl font-semibold transition-all">Go to Login</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'otp') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-10 max-w-md w-full">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Verify Your Email</h2>
+            <p className="text-gray-500 text-sm mt-2">We sent a 6-digit code to <span className="font-medium text-gray-700">{form.email}</span></p>
+          </div>
+
+          <form onSubmit={handleVerifyOtp} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Enter OTP</label>
+              <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} maxLength={6} placeholder="000000" className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition text-center text-2xl font-bold tracking-[0.5em] text-gray-900" />
+            </div>
+            <button type="submit" disabled={verifying || otp.length !== 6} className="w-full bg-primary hover:bg-primary-accent text-white py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              {verifying && <span className="btn-spinner"></span>}
+              {verifying ? 'Verifying...' : 'Verify Email'}
+            </button>
+          </form>
+
+          <div className="text-center mt-5">
+            <p className="text-sm text-gray-500">Didn't receive the code?</p>
+            <button onClick={handleResendOtp} disabled={sendingOtp || cooldown > 0} className="text-primary font-semibold text-sm hover:underline mt-1 disabled:opacity-50 disabled:no-underline">
+              {sendingOtp ? 'Sending...' : cooldown > 0 ? `Resend in ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}` : 'Resend OTP'}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -61,7 +149,7 @@ export default function RegisterPage() {
               </div>
               <div className="flex items-center gap-2 text-white/70 text-xs">
                 <svg className="w-4 h-4 text-green-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                Secure & verified account
+                OTP email verification
               </div>
               <div className="flex items-center gap-2 text-white/70 text-xs">
                 <svg className="w-4 h-4 text-green-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -132,8 +220,9 @@ export default function RegisterPage() {
               <ReCAPTCHA ref={recaptchaRef} sitekey={RECAPTCHA_SITE_KEY} onChange={setCaptchaValue} onExpired={() => setCaptchaValue(null)} size="normal" />
             </div>
 
-            <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary-accent text-white py-3 rounded-xl font-semibold transition-all active:scale-[0.98] disabled:opacity-50">
-              {loading ? 'Creating Account...' : 'Create Account'}
+            <button type="submit" disabled={loading || sendingOtp} className="w-full bg-primary hover:bg-primary-accent text-white py-3 rounded-xl font-semibold transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
+              {(loading || sendingOtp) && <span className="btn-spinner"></span>}
+              {sendingOtp ? 'Sending OTP...' : loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 

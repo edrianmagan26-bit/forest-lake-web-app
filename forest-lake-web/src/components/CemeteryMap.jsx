@@ -1,9 +1,10 @@
 import { APIProvider, Map, AdvancedMarker, Polygon } from '@vis.gl/react-google-maps';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import StatusBadge from './StatusBadge';
 import api from '../utils/api';
 
-const API_KEY = 'AIzaSyAZlAn5fIIkQobmGUpV0207KVn--oIhhZg';
+const API_KEY = 'AIzaSyCLGxMoMLeYHTe35Los_gEPNMEBMp0W6UU';
 const CENTER = { lat: 10.602369, lng: 122.935156 };
 const MAP_ID = 'forest_lake_map';
 
@@ -307,11 +308,132 @@ function LotPin({ lot, onClick, clickable = true }) {
   );
 }
 
-function LotSidebar({ lot, onClose, closing }) {
+function OwnerCard({ owner, onViewDeceased }) {
+  const o = owner;
+  const deceased = o.deceased || [];
+
+  return (
+    <div className="bg-blue-50 rounded-lg border border-blue-100 overflow-hidden">
+      <button onClick={() => onViewDeceased(o)} className="w-full flex items-center gap-3 p-3 hover:bg-blue-100/50 transition text-left">
+        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
+          {o.first_name?.[0]}{o.last_name?.[0]}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 truncate">{o.first_name} {o.last_name}</p>
+          {o.serial_number && <p className="text-xs text-gray-500 font-mono">{o.serial_number}</p>}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {deceased.length > 0 && <span className="text-xs text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded">{deceased.length}</span>}
+          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </div>
+      </button>
+    </div>
+  );
+}
+
+function DeceasedModal({ owner, onClose }) {
+  const deceased = owner.deceased || [];
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const calculateAge = (birthDate, deathDate) => {
+    if (!birthDate || !deathDate) return null;
+    const birth = new Date(birthDate);
+    const death = new Date(deathDate);
+    let age = death.getFullYear() - birth.getFullYear();
+    const m = death.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && death.getDate() < birth.getDate())) age--;
+    return age;
+  };
+
+  const timeSinceDeath = (deathDate) => {
+    if (!deathDate) return null;
+    const death = new Date(deathDate);
+    const now = new Date();
+    const diffMs = now - death;
+    if (diffMs < 0) return null;
+
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'Today';
+    if (days === 1) return '1 day ago';
+    if (days < 30) return `${days} days ago`;
+
+    const months = Math.floor(days / 30.44);
+    if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
+
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    if (remainingMonths === 0) return `${years} year${years > 1 ? 's' : ''} ago`;
+    return `${years} year${years > 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths > 1 ? 's' : ''} ago`;
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[10001] flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto py-8 px-4 animate-fade-in" onClick={onClose}>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 relative my-auto shrink-0 animate-scale-in" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all" aria-label="Close">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
+            {owner.first_name?.[0]}{owner.last_name?.[0]}
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">{owner.first_name} {owner.last_name}</h3>
+            {owner.serial_number && <p className="text-xs text-gray-500 font-mono">{owner.serial_number}</p>}
+          </div>
+        </div>
+
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Deceased Information ({deceased.length})</p>
+
+        {deceased.length > 0 ? (
+          <div className="space-y-3">
+            {deceased.map(d => {
+              const age = calculateAge(d.date_of_birth, d.date_of_death);
+              const sinceDeath = timeSinceDeath(d.date_of_death);
+              return (
+                <div key={d.id} className="bg-purple-50 rounded-xl p-4 border border-purple-100 space-y-1.5">
+                  <p className="text-sm font-semibold text-gray-900">{d.name}</p>
+                  {age !== null && (
+                    <p className="text-xs text-purple-700 font-medium">Age at death: {age} years old</p>
+                  )}
+                  {sinceDeath && (
+                    <p className="text-xs text-purple-700 font-medium">Passed: {sinceDeath}</p>
+                  )}
+                  {d.relationship_to_client && <p className="text-xs text-gray-500">Relationship: <span className="text-gray-700">{d.relationship_to_client}</span></p>}
+                  {d.date_of_birth && <p className="text-xs text-gray-500">Born: <span className="text-gray-700">{d.date_of_birth}</span></p>}
+                  {d.date_of_death && <p className="text-xs text-gray-500">Died: <span className="text-gray-700">{d.date_of_death}</span></p>}
+                  {d.burial_date && <p className="text-xs text-gray-500">Burial Date: <span className="text-gray-700">{d.burial_date}</span></p>}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8 bg-gray-50 rounded-xl">
+            <p className="text-sm text-gray-400">No deceased information yet</p>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function LotModal({ lot, onClose, onReserve }) {
   const [images, setImages] = useState([]);
   const [activeImg, setActiveImg] = useState(0);
   const [loadingImages, setLoadingImages] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [owners, setOwners] = useState([]);
+  const [selectedOwner, setSelectedOwner] = useState(null);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   useEffect(() => {
     setLoadingImages(true);
@@ -320,6 +442,11 @@ function LotSidebar({ lot, onClose, closing }) {
       .then(res => setImages(res.data.data || []))
       .catch(() => setImages([]))
       .finally(() => setLoadingImages(false));
+
+    // Fetch owners (includes deceased info per owner)
+    api.get(`/burial-lots/owners.php?lot_id=${lot.id}`)
+      .then(res => setOwners(res.data.data || []))
+      .catch(() => setOwners([]));
   }, [lot.id]);
 
   const currentImage = images[activeImg];
@@ -327,114 +454,106 @@ function LotSidebar({ lot, onClose, closing }) {
 
   return (
     <>
-    <div className={`absolute top-0 right-0 h-full w-80 max-w-[85%] bg-white shadow-2xl z-50 flex flex-col overflow-hidden transition-transform duration-250 ease-out ${closing ? 'translate-x-full' : 'translate-x-0 animate-[slideIn_0.25s_ease-out]'}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 shrink-0">
-        <h3 className="font-bold text-primary-dark text-sm">Lot Details</h3>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none" aria-label="Close">&times;</button>
-      </div>
+      <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto py-8 px-4 animate-fade-in" onClick={onClose}>
+        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 relative my-auto shrink-0 animate-scale-in" onClick={e => e.stopPropagation()}>
+          <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all" aria-label="Close">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Image gallery */}
-        {loadingImages ? (
-          <div className="rounded-xl bg-gray-100 h-44 flex items-center justify-center animate-pulse">
-            <span className="text-gray-400 text-sm">Loading...</span>
-          </div>
-        ) : images.length > 0 ? (
-          <div>
-            {/* Main image — clickable for fullscreen */}
-            <div className="rounded-xl overflow-hidden border border-gray-200 relative cursor-pointer" onClick={() => setFullscreen(true)}>
-              <img src={imageUrl} alt={`Lot ${lot.lot_number}`} className="w-full h-44 object-cover hover:opacity-90 transition" />
-              {currentImage?.image_type === '360' && (
-                <span className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">🌐 360°</span>
-              )}
-              {images.length > 1 && (
-                <span className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
-                  {activeImg + 1}/{images.length}
-                </span>
-              )}
-              <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">🔍 Click to enlarge</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-4 pr-8">Lot {lot.lot_number} Details</h3>
+
+          {/* Image gallery */}
+          {loadingImages ? (
+            <div className="rounded-xl bg-gray-100 h-48 flex items-center justify-center animate-pulse mb-4">
+              <span className="text-gray-400 text-sm">Loading...</span>
             </div>
-            {/* Prev/Next arrows */}
-            {images.length > 1 && (
-              <div className="flex justify-between mt-2">
-                <button onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)} className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full text-sm transition">&lt;</button>
-                <button onClick={() => setActiveImg(i => (i + 1) % images.length)} className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-8 h-8 rounded-full text-sm transition">&gt;</button>
+          ) : images.length > 0 ? (
+            <div className="mb-4">
+              <div className="rounded-xl overflow-hidden border border-gray-200 relative cursor-pointer" onClick={() => setFullscreen(true)}>
+                <img src={imageUrl} alt={`Lot ${lot.lot_number}`} className="w-full h-48 object-cover hover:opacity-90 transition" />
+                {currentImage?.image_type === '360' && (
+                  <span className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">🌐 360°</span>
+                )}
+                {images.length > 1 && (
+                  <span className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">{activeImg + 1}/{images.length}</span>
+                )}
               </div>
-            )}
-            {/* Thumbnails */}
-            {images.length > 1 && (
-              <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-                {images.map((img, i) => {
-                  const thumbUrl = img.image_path.startsWith('http') ? img.image_path : `${IMAGE_BASE}${img.image_path}`;
-                  return (
-                    <button
-                      key={img.id}
-                      onClick={() => setActiveImg(i)}
-                      className={`shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition ${i === activeImg ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                    >
-                      <img src={thumbUrl} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="rounded-xl bg-gray-100 h-32 flex items-center justify-center text-gray-400 text-sm">
-            No images available
-          </div>
-        )}
+              {images.length > 1 && (
+                <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
+                  {images.map((img, i) => {
+                    const thumbUrl = img.image_path.startsWith('http') ? img.image_path : `${IMAGE_BASE}${img.image_path}`;
+                    return (
+                      <button key={img.id} onClick={() => setActiveImg(i)} className={`shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition ${i === activeImg ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+                        <img src={thumbUrl} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : null}
 
-        {/* Status */}
-        <div><StatusBadge status={lot.status} /></div>
+          {/* Status */}
+          <div className="mb-4"><StatusBadge status={lot.status} /></div>
 
-        {/* Details */}
-        <div className="space-y-3">
-          <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+          {/* Lot Details */}
+          <div className="bg-gray-50 rounded-xl p-4 space-y-2 mb-4">
             <DetailRow label="Lot Number" value={lot.lot_number} />
             <DetailRow label="Block" value={lot.block} />
             <DetailRow label="Section" value={lot.section} />
             <DetailRow label="Area" value={lot.square_meter ? `${lot.square_meter} m²` : '—'} />
+            <DetailRow label="Slots" value={`${lot.max_slots || 8}`} />
           </div>
 
           {lot.description && (
-            <div>
+            <div className="mb-4">
               <p className="text-xs font-medium text-gray-500 mb-1">Description</p>
               <p className="text-sm text-gray-700">{lot.description}</p>
             </div>
           )}
 
-          <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-            <DetailRow label="Latitude" value={lot.latitude} />
-            <DetailRow label="Longitude" value={lot.longitude} />
-          </div>
+          {/* Owners */}
+          {owners.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Lot Owners ({owners.length})</p>
+              <div className="space-y-2">
+                {owners.map(o => (
+                  <OwnerCard key={o.reservation_id} owner={o} onViewDeceased={setSelectedOwner} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Deceased Information - removed, now shown per owner */}
+
+          {/* Reserve Button */}
+          {onReserve && lot.status === 'available' && (
+            <button onClick={() => { onReserve(lot); onClose(); }} className="w-full btn-primary flex items-center justify-center gap-2 mt-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+              Reserve This Lot
+            </button>
+          )}
         </div>
       </div>
-    </div>
 
-    {/* Fullscreen Image Lightbox */}
-    {fullscreen && imageUrl && (
-      <div className="fixed inset-0 z-[300] bg-black/90 flex items-center justify-center p-4" onClick={() => setFullscreen(false)}>
-        <button className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10" onClick={() => setFullscreen(false)}>&times;</button>
+      {/* Deceased Info Modal for selected owner */}
+      {selectedOwner && (
+        <DeceasedModal owner={selectedOwner} onClose={() => setSelectedOwner(null)} />
+      )}
 
-        {images.length > 1 && (
-          <>
-            <button onClick={(e) => { e.stopPropagation(); setActiveImg(i => (i - 1 + images.length) % images.length); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full text-lg transition">&lt;</button>
-            <button onClick={(e) => { e.stopPropagation(); setActiveImg(i => (i + 1) % images.length); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full text-lg transition">&gt;</button>
-          </>
-        )}
-
-        <img src={imageUrl} alt={`Lot ${lot.lot_number}`} className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={e => e.stopPropagation()} />
-
-        {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
-            {activeImg + 1} / {images.length}
-          </div>
-        )}
-      </div>
-    )}
+      {/* Fullscreen Image Lightbox */}
+      {fullscreen && imageUrl && (
+        <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4" onClick={() => setFullscreen(false)}>
+          <button className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10" onClick={() => setFullscreen(false)}>&times;</button>
+          {images.length > 1 && (
+            <>
+              <button onClick={(e) => { e.stopPropagation(); setActiveImg(i => (i - 1 + images.length) % images.length); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full text-lg transition">&lt;</button>
+              <button onClick={(e) => { e.stopPropagation(); setActiveImg(i => (i + 1) % images.length); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full text-lg transition">&gt;</button>
+            </>
+          )}
+          <img src={imageUrl} alt={`Lot ${lot.lot_number}`} className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={e => e.stopPropagation()} />
+        </div>
+      )}
     </>
   );
 }
@@ -448,25 +567,24 @@ function DetailRow({ label, value }) {
   );
 }
 
-export default function CemeteryMap({ lots = [], height = '500px', onMapClick, isAdmin = false }) {
+export default function CemeteryMap({ lots = [], height = '500px', onMapClick, isAdmin = false, onReserve, focusLotId }) {
   const [selectedLot, setSelectedLot] = useState(null);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [closing, setClosing] = useState(false);
   const isEditMode = !!onMapClick;
 
-  const openSidebar = (lot) => {
+  // Auto-open modal for focused lot
+  useEffect(() => {
+    if (focusLotId && lots.length > 0) {
+      const lot = lots.find(l => l.id == focusLotId);
+      if (lot) setSelectedLot(lot);
+    }
+  }, [focusLotId, lots]);
+
+  const openModal = (lot) => {
     setSelectedLot(lot);
-    setSidebarVisible(true);
-    setClosing(false);
   };
 
-  const closeSidebar = () => {
-    setClosing(true);
-    setTimeout(() => {
-      setSidebarVisible(false);
-      setSelectedLot(null);
-      setClosing(false);
-    }, 250);
+  const closeModal = () => {
+    setSelectedLot(null);
   };
 
   return (
@@ -490,7 +608,6 @@ export default function CemeteryMap({ lots = [], height = '500px', onMapClick, i
             { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'off' }] },
           ]}
           onClick={(e) => {
-            if (!isEditMode) closeSidebar();
             if (onMapClick && e.detail?.latLng) {
               onMapClick({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng });
             }
@@ -548,14 +665,15 @@ export default function CemeteryMap({ lots = [], height = '500px', onMapClick, i
 
           {lots.map(lot => (
             lot.latitude && lot.longitude && (
-              <LotPin key={lot.id} lot={lot} onClick={openSidebar} clickable={!isEditMode} />
+              <LotPin key={lot.id} lot={lot} onClick={openModal} clickable={!isEditMode} />
             )
           ))}
         </Map>
       </APIProvider>
 
-      {sidebarVisible && selectedLot && !isEditMode && (
-        <LotSidebar lot={selectedLot} onClose={closeSidebar} closing={closing} />
+      {selectedLot && !isEditMode && createPortal(
+        <LotModal lot={selectedLot} onClose={closeModal} onReserve={onReserve} />,
+        document.body
       )}
     </div>
   );

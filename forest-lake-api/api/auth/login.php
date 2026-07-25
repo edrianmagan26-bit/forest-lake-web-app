@@ -32,7 +32,7 @@ if ($user['status'] === 'inactive') {
 
 if (!$user['email_verified']) {
     http_response_code(403);
-    echo json_encode(['message' => 'Please verify your email address before logging in.']);
+    echo json_encode(['message' => 'Please verify your email address before logging in.', 'unverified' => true, 'email' => $user['email']]);
     exit;
 }
 
